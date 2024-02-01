@@ -6,3 +6,4 @@
 * JS API package<br>http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/
 * `espn-api` package<br>https://github.com/cwendt94/espn-api
     * useful for general layout of the API
+* how to get necessary cookies<br>https://cran.r-project.org/web/packages/ffscrapr/vignettes/espn_authentication.html
