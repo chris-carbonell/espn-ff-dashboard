@@ -1,3 +1,7 @@
+# working
+.env
+/lab/working
+
 # python
 __pycache__/
 *.py[cod]
