@@ -1,7 +1,8 @@
 # data
+espn_api
 pandas
-sqlalchemy
 psycopg2
+sqlalchemy
 
 # notebook
 jupyter
