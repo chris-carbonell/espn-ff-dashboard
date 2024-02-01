@@ -1,0 +1,68 @@
+# Overview
+# build env to pull data and visualize it
+
+version: '3.7'
+
+name: ${PROJECT_NAME}  # project name (aka stack)
+
+services:
+
+  # db
+  # database
+  db:
+    image: postgres:16.1
+    container_name: ${PROJECT_ABBREV}-db
+
+    restart: always
+
+    ports:
+      - "5432:${POSTGRES_PORT}"
+    
+    env_file:
+      - .env
+    
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d/
+
+    healthcheck:
+      test: pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+    networks:
+      - ffd
+
+  # jupyterlab
+  lab:
+    build: ./lab
+    container_name: ${PROJECT_ABBREV}-lab
+
+    restart: unless-stopped
+
+    ports:
+      - ${LAB_PORT}:8888
+
+    env_file:
+      - .env
+
+    volumes:
+      - type: bind
+        source: ./lab/working
+        target: /usr/app
+      # you could pass the whole config if you want
+      # e.g., manually set hashed password
+      # - type: bind
+      #   source: ./lab/config/jupyter_notebook_config.py
+      #   target: /root/.jupyter/jupyter_notebook_config.py
+    
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - ffd
+
+networks:
+  ffd:
