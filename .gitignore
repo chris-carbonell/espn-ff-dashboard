@@ -1,6 +1,7 @@
 # working
 .env
 /lab/working
+/db/data
 
 # python
 __pycache__/
