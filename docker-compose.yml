@@ -16,7 +16,7 @@ services:
     restart: always
 
     ports:
-      - "5432:${POSTGRES_PORT}"
+      - "${DB_PORT}:${POSTGRES_PORT}"
     
     env_file:
       - .env
