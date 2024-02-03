@@ -45,6 +45,9 @@ services:
       - ./dbt/app:/usr/app
       - ./dbt/profiles.yml:/root/.dbt/profiles.yml
 
+    env_file:
+      - .env
+
     depends_on:
       db:
         condition: service_healthy
