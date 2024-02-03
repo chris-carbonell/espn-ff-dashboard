@@ -1,0 +1,29 @@
+name: ffd
+
+config-version: 2
+version: 1.0.0
+
+profile: ffd
+
+# https://docs.getdbt.com/reference/model-configs
+models:
+  # Be sure to namespace your model configs to your project name
+  ffd:
+
+    # staging
+    01_stg:
+      +enable: true
+      +schema: 01_stg
+      +materialized: table
+
+    # intermedate
+    02_int:
+      +enable: true
+      +schema: 02_int
+      +materialized: table
+
+    # mart
+    03_mrt:
+      +enable: true
+      +schema: 03_mrt
+      +materialized: table
