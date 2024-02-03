@@ -1,7 +1,16 @@
-# https://docs.getdbt.com/docs/core/connect-data-platform/profiles.yml
+# Overview
+# * postgres target
+# * fal target
+
+# Resources
+# * https://docs.getdbt.com/docs/core/connect-data-platform/profiles.yml
+# * https://docs.getdbt.com/docs/core/connect-data-platform/fal-setup
+
+# config
 config:
   fail_fast: true
 
+# targets
 ffd:
   
   # default target
@@ -10,7 +19,7 @@ ffd:
   # outputs = targets
   outputs:
 
-    # staging
+    # public
     public:
       type: postgres
       host: "{{ env_var('POSTGRES_HOST') }}"
@@ -19,3 +28,8 @@ ffd:
       schema: "{{ env_var('POSTGRES_SCHEMA') }}"
       user: "{{ env_var('POSTGRES_USER') }}"
       password: "{{ env_var('POSTGRES_PASSWORD') }}"
+
+    # fal
+    fal:
+      type: fal
+      db_profile: public
