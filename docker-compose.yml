@@ -8,7 +8,6 @@ name: ${PROJECT_NAME}  # project name (aka stack)
 services:
 
   # db
-  # database
   db:
     image: postgres:16.1
     container_name: ${PROJECT_ABBREV}-db
@@ -30,6 +29,25 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+
+    networks:
+      - ffd
+
+  # dbt
+  dbt:
+    # image: ghcr.io/dbt-labs/dbt-postgres:latest
+    build:
+      context: ./dbt
+      
+    container_name: ${PROJECT_ABBREV}-dbt
+
+    volumes:
+      - ./dbt/app:/usr/app
+      - ./dbt/profiles.yml:/root/.dbt/profiles.yml
+
+    depends_on:
+      db:
+        condition: service_healthy
 
     networks:
       - ffd
