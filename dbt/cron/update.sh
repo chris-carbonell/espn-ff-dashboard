@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-dbt run
+UPDATE=false
+if $UPDATE ; then
+    dbt run
+fi
