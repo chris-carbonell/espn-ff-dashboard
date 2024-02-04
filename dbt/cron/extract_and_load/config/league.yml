@@ -1,0 +1,4 @@
+league:
+  league_id: ${league_id}
+  espn_s2: ${espn_s2}
+  swid: ${swid}

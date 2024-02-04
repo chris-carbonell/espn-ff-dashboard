@@ -1,0 +1,6 @@
+data:
+  drivername: "postgresql"
+  host: ${POSTGRES_HOST}
+  database: ${POSTGRES_DB}
+  username: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
