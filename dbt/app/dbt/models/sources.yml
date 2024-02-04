@@ -1,0 +1,15 @@
+# https://docs.getdbt.com/docs/build/sources
+# https://stackoverflow.com/questions/67904146/dbt-depends-on-a-source-not-found
+
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('POSTGRES_DB') }}"
+    schema: a_raw
+    tables:
+      - name: matchup
+      - name: roster
+      - name: settings
+      - name: standings
+      - name: team
