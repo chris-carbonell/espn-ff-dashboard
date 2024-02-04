@@ -11,19 +11,19 @@ models:
   ffd:
 
     # staging
-    01_stg:
+    b_stg:
       +enable: true
-      +schema: 01_stg
+      +schema: b_stg
       +materialized: table
 
     # intermedate
-    02_int:
+    c_int:
       +enable: true
-      +schema: 02_int
+      +schema: c_int
       +materialized: table
 
     # mart
-    03_mrt:
+    d_mrt:
       +enable: true
-      +schema: 03_mrt
+      +schema: d_mrt
       +materialized: table
