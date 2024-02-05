@@ -1,5 +1,4 @@
 # data
-espn_api
 pandas
 psycopg2
 sqlalchemy
