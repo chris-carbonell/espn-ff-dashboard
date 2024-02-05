@@ -11,10 +11,11 @@ COPY ./cron/cron_update /etc/cron.d/cron_update
 RUN chmod 0644 /etc/cron.d/cron_update
 RUN crontab /etc/cron.d/cron_update
 
-# copy backup scripts
+# copy cron scripts
 RUN mkdir -p /home/update
 COPY ./cron/update.sh /home/update/.
 RUN chmod 0744 /home/update/update.sh
+COPY ./cron/extract_and_load /home/update/extract_and_load
 
 RUN touch /var/log/cron.log
 

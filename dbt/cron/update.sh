@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # constants
-UPDATE=false
+UPDATE=true
 
 # update
 if $UPDATE ; then
