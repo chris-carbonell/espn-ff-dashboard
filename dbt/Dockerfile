@@ -2,6 +2,10 @@ FROM ghcr.io/dbt-labs/dbt-postgres:latest
 
 RUN apt-get update && apt-get -y install cron
 
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip \
+    && python -m pip install -r requirements.txt
+
 # set up cron
 COPY ./cron/cron_update /etc/cron.d/cron_update
 RUN chmod 0644 /etc/cron.d/cron_update
