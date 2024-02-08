@@ -1,3 +1,4 @@
 # working
 app/dbt/logs
 app/dbt/target
+app/dbt/dbt_packages
