@@ -6,10 +6,6 @@ WITH
 
     -- dims
 
-	, dim_player_stats AS (
-		SELECT * FROM {{ ref('dim_player_stats') }}
-	)
-
     , dim_players AS (
 		SELECT * FROM {{ ref('dim_players') }}
 	)
@@ -20,11 +16,14 @@ WITH
 
     -- fct_points
     , fct_points AS (
-        SELECT DISTINCT
-            -- {{ dbt_utils.generate_surrogate_key(['player_stats_id']) }} as player_stats_key
+        SELECT
+            -- surrogate keys
             {{ dbt_utils.generate_surrogate_key(['player_id']) }} as player_key
             , {{ dbt_utils.generate_surrogate_key(['stat']) }} as stat_key
+
+            -- facts
             , points_scored
+            
         FROM hilaw
     )
 
