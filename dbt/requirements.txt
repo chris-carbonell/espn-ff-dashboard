@@ -1,3 +1,6 @@
 # data
-psycopg2
+psycopg2-binary
 sqlalchemy
+
+# dbt
+dbt-postgres

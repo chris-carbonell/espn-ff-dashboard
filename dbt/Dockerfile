@@ -1,5 +1,4 @@
-# https://github.com/dbt-labs/dbt-core/pkgs/container/dbt-postgres
-FROM ghcr.io/dbt-labs/dbt-postgres:1.5.8
+FROM python:3.12.2-slim-bookworm
 
 RUN apt-get update && apt-get -y install cron
 
@@ -23,5 +22,11 @@ RUN touch /var/log/cron.log
 RUN ln -sf /dev/stdout /var/log/cron.log \
     && ln -sf /dev/stderr /var/log/cron.log
 
-ENTRYPOINT []
-CMD ["cron", "-f", "&&", "tail", "-f", "/var/log/cron.log"]
+# set up entrypoint
+# for some reason, I can't execute from /usr/app
+COPY docker-entrypoint.sh /
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+
+WORKDIR /usr/app/dbt
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
