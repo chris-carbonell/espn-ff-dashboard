@@ -1,4 +1,5 @@
-FROM ghcr.io/dbt-labs/dbt-postgres:latest
+# https://github.com/dbt-labs/dbt-core/pkgs/container/dbt-postgres
+FROM ghcr.io/dbt-labs/dbt-postgres:1.5.8
 
 RUN apt-get update && apt-get -y install cron
 

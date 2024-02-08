@@ -13,7 +13,7 @@ WITH
 		SELECT
 			roster_id
 			, res
-		FROM a_raw.roster
+		FROM {{ source('raw', 'roster') }}
 	)
 
 	-- teams
