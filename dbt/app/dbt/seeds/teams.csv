@@ -1,0 +1,34 @@
+abbrev,byeWeek,id,location,name,universeId
+FA,0,0,,FA,0
+Atl,11,1,Atlanta,Falcons,2
+Buf,13,2,Buffalo,Bills,1
+Chi,13,3,Chicago,Bears,2
+Cin,7,4,Cincinnati,Bengals,1
+Cle,5,5,Cleveland,Browns,1
+Dal,7,6,Dallas,Cowboys,2
+Den,9,7,Denver,Broncos,1
+Det,9,8,Detroit,Lions,2
+GB,6,9,Green Bay,Packers,2
+Ten,7,10,Tennessee,Titans,1
+Ind,11,11,Indianapolis,Colts,1
+KC,10,12,Kansas City,Chiefs,1
+LV,13,13,Las Vegas,Raiders,1
+LAR,10,14,Los Angeles,Rams,2
+Mia,10,15,Miami,Dolphins,1
+Min,13,16,Minnesota,Vikings,2
+NE,11,17,New England,Patriots,1
+NO,11,18,New Orleans,Saints,2
+NYG,13,19,New York,Giants,2
+NYJ,7,20,New York,Jets,1
+Phi,10,21,Philadelphia,Eagles,2
+Ari,14,22,Arizona,Cardinals,2
+Pit,6,23,Pittsburgh,Steelers,1
+LAC,5,24,Los Angeles,Chargers,1
+SF,9,25,San Francisco,49ers,2
+Sea,5,26,Seattle,Seahawks,2
+TB,5,27,Tampa Bay,Buccaneers,2
+Wsh,14,28,Washington,Commanders,2
+Car,7,29,Carolina,Panthers,2
+Jax,9,30,Jacksonville,Jaguars,1
+Bal,13,33,Baltimore,Ravens,1
+Hou,7,34,Houston,Texans,1

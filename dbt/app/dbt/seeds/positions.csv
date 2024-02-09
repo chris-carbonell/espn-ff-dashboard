@@ -1,0 +1,19 @@
+abbrev,active,display,displayOrder,id,name,parentId,statCategoryId
+POS0,True,False,0,0,POS0,0,0
+QB,True,True,1,1,Quarterback,0,0
+RB,True,True,2,2,Running Back,0,0
+WR,True,True,3,3,Wide Receiver,0,0
+TE,True,True,4,4,Tight End,0,0
+K,True,True,5,5,Place Kicker,0,3
+POS6,True,False,6,6,POS6,0,0
+P,True,True,7,7,Punter,0,2
+POS8,True,False,8,8,POS8,0,0
+DT,True,True,9,9,Defensive Tackle,0,1
+DE,True,True,10,10,Defensive End,0,1
+LB,True,True,11,11,Linebacker,0,1
+CB,True,True,12,12,Cornerback,0,1
+S,True,True,13,13,Safety,0,1
+HC,True,True,14,14,Head Coach,0,4
+TQB,True,True,15,15,Team Quarterback,0,0
+D/ST,True,True,16,16,Team Defense/Special Teams,0,5
+EDR,True,False,17,17,Edge Rusher,0,1
