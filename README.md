@@ -6,6 +6,7 @@
 * JS API package<br>http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/
 * python repos that pull from the API
     * `espn-api`<br>https://github.com/cwendt94/espn-api
+        * stat ID mapping<br>https://github.com/cwendt94/espn-api/issues/84
     * `espnff`<br>https://github.com/rbarton65/espnff
     * useful for general layout of the API
 * how to get necessary cookies<br>https://cran.r-project.org/web/packages/ffscrapr/vignettes/espn_authentication.html
@@ -22,6 +23,7 @@
     * if each team played every other team, what would their record be?
 
 # Roadmap
+* get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
 * save data['teams']
     * we'll need to decode teamId
 * save data['settings']['scoringSettings']['scoringItems']
