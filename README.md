@@ -23,6 +23,7 @@
     * if each team played every other team, what would their record be?
 
 # Roadmap
+* create OBT from star
 * get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
 * save data['teams']
     * we'll need to decode teamId
