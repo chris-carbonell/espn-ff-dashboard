@@ -1,4 +1,7 @@
 # working
 app/dbt/logs
 app/dbt/target
+
+# dbt
 app/dbt/dbt_packages
+app/dbt/package-lock.yml
