@@ -17,7 +17,8 @@ WITH
             , player_id
             , player_full_name
             , player_stats_id
-            , stat
+            -- a_seed.stats.id is an integer
+            , CAST(stat AS INTEGER) AS stat
             , ROUND(points_scored::NUMERIC, 2) AS points_scored
         FROM hilaw
     )
