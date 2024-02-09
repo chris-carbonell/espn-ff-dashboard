@@ -1,6 +1,7 @@
 # data
 pandas
 psycopg2
+pyarrow
 sqlalchemy
 
 # notebook
