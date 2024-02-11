@@ -180,7 +180,7 @@ def insert_data(engine, table: str, data: dict):
     with engine.begin() as con:
         con.execute(text(sql), data)
 
-def update_raw(engine, view: str, season_id: str, league_id: str, cookies: dict):
+def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_period: str, view: str):
     '''
     request latest data and insert if new
     '''
@@ -190,7 +190,7 @@ def update_raw(engine, view: str, season_id: str, league_id: str, cookies: dict)
 
     # get res
     url = f"https://fantasy.espn.com/apis/v3/games/ffl/seasons/{season_id}/segments/0/leagues/{league_id}"
-    params = {'view': view}
+    params = {'scoringPeriodId': scoring_period, 'view': view}
     data = get_data(url = url, params = params, cookies = cookies)
 
     # get latest data

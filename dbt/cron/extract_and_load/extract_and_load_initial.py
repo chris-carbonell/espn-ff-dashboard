@@ -46,8 +46,9 @@ def main():
 
     # update raw
     for season_id in season_ids:
-        for view in ["mTeam", "mRoster", "mMatchup", "mSettings", "mStandings"]:
-            update_raw(engine, view, season_id, league_id, cookies)
+        for scoring_period in scoring_periods:
+            for view in ["mTeam", "mRoster", "mMatchup", "mSettings", "mStandings"]:
+                update_raw(engine, cookies, league_id, season_id, scoring_period, view)
 
 if __name__ == "__main__":
     main()
