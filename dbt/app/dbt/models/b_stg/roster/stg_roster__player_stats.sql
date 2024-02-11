@@ -75,6 +75,9 @@ WITH
 			, player_id
 			, player_full_name
 			, stats #>> '{id}' AS player_stats_id
+			-- the real stats have statSourceId = 0 and statSplitTypeId = 1
+			, stats #>> '{statSourceId}' AS stat_source_id
+			, stats #>> '{statSplitTypeId}' AS stat_split_type_id
             -- applied total not needed because, when the stats are broken out,
             -- they'll total out to the applied total
             -- this might be nice for verification in the future
@@ -84,26 +87,19 @@ WITH
 		FROM players
 	)
 	
-	-- rank_player_stats_all
-    -- get rank based on length of player_stats_id
-    , rank_player_stats_all AS (
-		SELECT
-			*
-			, RANK() OVER(PARTITION BY roster_id, player_id ORDER BY LENGTH(player_stats_id) DESC) AS rank
-		FROM player_stats_all
-	)
-	
 	-- player_stats_real
-    -- assume longest ID is the real ID
     , player_stats_real AS (
 		SELECT
 			roster_id
 			, player_id
 			, player_full_name
 			, player_stats_id
+			, stat_source_id
+			, stat_split_type_id
 			, applied_stats
-		FROM rank_player_stats_all
-		WHERE rank = 1
+		FROM player_stats_all
+		WHERE stat_source_id = '0'
+			AND stat_split_type_id = '1'
 	)
 	
 	-- player_stats_each
@@ -114,6 +110,8 @@ WITH
 			, p.player_id
 			, p.player_full_name
 			, p.player_stats_id
+			-- , p.stat_source_id
+			-- , p.stat_split_type_id
 			
 			, stats.key AS stat
 			, stats.value AS points_scored
@@ -125,5 +123,5 @@ WITH
 	, lutu AS (
 		SELECT * FROM player_stats_each
 	)
-	
+
 SELECT * FROM lutu
