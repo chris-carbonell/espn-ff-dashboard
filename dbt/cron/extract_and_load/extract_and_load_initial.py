@@ -4,6 +4,9 @@
 
 # Dependencies
 
+# general
+import logging
+
 # data
 import requests
 
@@ -17,6 +20,12 @@ from utils.data import *
 
 # constants
 from constants import *
+
+# Set Up
+
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 # Funcs
 
@@ -46,7 +55,7 @@ def main():
 
     # update raw
     for season_id in season_ids:
-        for scoring_period in scoring_periods:
+        for scoring_period in list(range(1, 17)):
             for view in ["mTeam", "mRoster", "mMatchup", "mSettings", "mStandings"]:
                 update_raw(engine, cookies, league_id, season_id, scoring_period, view)
 

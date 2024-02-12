@@ -14,6 +14,9 @@
 
 # Dependencies
 
+# general
+import logging
+
 # db
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -27,6 +30,10 @@ from constants import *
 
 # constants
 from constants import RAW_SCHEMA, EXPECTED_TABLES
+
+# Set Up
+
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 

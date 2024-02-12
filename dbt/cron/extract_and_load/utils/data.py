@@ -74,6 +74,7 @@ def get_data(url: str, cookies: dict, **kwargs):
         headers = headers,
         **kwargs
     )
+    logger.debug(res.url)
     
     # prep data
     data = {
@@ -83,9 +84,9 @@ def get_data(url: str, cookies: dict, **kwargs):
         'res': json.dumps(res.json(), sort_keys = True),
     }
 
-    return data
+    return res.url, data
 
-def get_latest_data(engine, table: str):
+def get_latest_data(engine, table: str, request_url: str):
     '''
     get latest data by timestamp
     '''
@@ -93,6 +94,7 @@ def get_latest_data(engine, table: str):
         SELECT 
             res
         FROM {RAW_SCHEMA}.{table}
+        WHERE request_url = {request_url}
         ORDER BY ts_load DESC
         LIMIT 1
         ;
@@ -180,7 +182,7 @@ def insert_data(engine, table: str, data: dict):
     with engine.begin() as con:
         con.execute(text(sql), data)
 
-def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_period: str, view: str):
+def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_period: str, view: str, force_insert: bool = False):
     '''
     request latest data and insert if new
     '''
@@ -191,23 +193,25 @@ def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_pe
     # get res
     url = f"https://fantasy.espn.com/apis/v3/games/ffl/seasons/{season_id}/segments/0/leagues/{league_id}"
     params = {'scoringPeriodId': scoring_period, 'view': view}
-    data = get_data(url = url, params = params, cookies = cookies)
-
-    # get latest data
-    data_latest = get_latest_data(engine, table)
+    request_url, data = get_data(url = url, params = params, cookies = cookies)
 
     # determine if insert necessary
-    insert = False
-    if data_latest:
-        # insert = data_latest != json.loads(data['res'])
-        # insert = not compare_dicts(data_latest, json.loads(data['res']))
-        insert = not compare_dicts(data_latest, data_latest)
-    else:
-        # no data so insert
+    if force_insert:
         insert = True
+    else:
+        # get latest data
+        data_latest = get_latest_data(engine, table, request_url)
+
+        # check if insert necessary
+        insert = False
+        if data_latest:
+            insert = not compare_dicts(data_latest, data_latest)
+        else:
+            # no data so insert
+            insert = True
 
     logger.debug(f"{table}: {insert}")
 
-    insert
+    # insert
     if insert:
         insert_data(engine, table, data)
