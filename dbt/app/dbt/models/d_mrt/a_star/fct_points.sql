@@ -22,7 +22,8 @@ WITH
             , {{ dbt_utils.generate_surrogate_key(['stat']) }} as stat_key
 
             -- facts
-            , points_scored
+            , points_projected
+            , points_actual
             
         FROM hilaw
     )

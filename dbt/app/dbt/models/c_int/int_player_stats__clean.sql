@@ -4,9 +4,7 @@
 WITH
 
     hilaw AS (
-        SELECT
-            *
-        FROM {{ ref('stg_roster__player_stats') }}
+        SELECT * FROM {{ ref('stg_roster__player_stats') }}
     )
 
     -- clean
@@ -16,17 +14,15 @@ WITH
             roster_id
             , player_id
             , player_full_name
-            , player_stats_id
+            , point_type
             -- a_seed.stats.id is an integer
             , CAST(stat AS INTEGER) AS stat
-            , ROUND(points_scored::NUMERIC, 2) AS points_scored
+            , ROUND(points::NUMERIC, 2) AS points
         FROM hilaw
     )
 
     , lutu AS (
-        SELECT
-            *
-        FROM clean
+        SELECT * FROM clean
     )
 
 SELECT * FROM lutu
