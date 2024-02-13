@@ -1,16 +1,16 @@
 WITH
 
 	hilaw AS (
-		SELECT * FROM {{ ref('stg_team__team_info') }}
+		SELECT * FROM {{ ref('int_team_info__clean') }}
 	)
-	
-    -- teams
-	, teams AS (
-		SELECT
-			team_id
 
-			-- team info
-			, team_logo
+    -- dim
+    , dim AS (
+        SELECT DISTINCT
+            {{ dbt_utils.generate_surrogate_key(['team_id']) }} as team_key
+
+            -- team
+            , team_logo
 			, team_name
 			, team_abbrev
 			, team_owner
@@ -21,8 +21,8 @@ WITH
 			, team_record_losses
 			
 			-- points
-			, ROUND(team_points_for::NUMERIC, 2) AS team_points_for
-			, ROUND(team_points_against::NUMERIC, 2) AS team_points_against
+			, team_points_for
+			, team_points_against
 			
 			-- stats
 			, team_values_by_stat
@@ -36,12 +36,12 @@ WITH
 			, team_transactions_team_charges
 			, team_transactions_acquisitions
 			, team_transactions_move_to_active
-		
-		FROM hilaw
-	)
-	
-	, lutu AS (
-		SELECT * FROM teams
+
+        FROM hilaw
+    )
+
+    , lutu AS (
+		SELECT * FROM dim
 	)
 	
 SELECT * FROM lutu

@@ -10,25 +10,11 @@
 WITH
 
 	hilaw AS (
-		SELECT
-			roster_id
-			, request_url
-			, res
-		FROM {{ source('raw', 'roster') }}
-		LIMIT {{ var("limit", "NONE") }}
+		SELECT * FROM {{ ref("stg_roster__player_stats_raw") }}
 	)
 	
 	, slots AS (
 		SELECT * FROM {{ ref('slots') }}
-	)
-	
-	-- constants
-	, constants AS (
-		SELECT
-			roster_id
-			, CAST(res #>> '{seasonId}' AS INTEGER) AS season_id
-			, CAST(res #>> '{scoringPeriodId}' AS INTEGER) AS scoring_period_id
-		FROM hilaw
 	)
 
 	-- teams
@@ -56,6 +42,7 @@ WITH
     , entries AS (
 		SELECT
 			roster_id
+			, teams #>> '{id}' AS team_id
 			, JSONB_ARRAY_ELEMENTS(teams #> '{roster, entries}') AS entries
 		FROM teams
 	)
@@ -77,6 +64,7 @@ WITH
 	, player_stats AS (
 		SELECT
 			roster_id
+			, team_id
 			, entries #>> '{playerPoolEntry, player, fullName}' AS player_full_name
 			, entries #>> '{playerPoolEntry, player, id}' AS player_id
 			
@@ -106,6 +94,7 @@ WITH
     , player_stats_all AS (
 		SELECT
 			roster_id
+			, team_id
 			, player_id
 			, player_full_name
 			
@@ -115,8 +104,8 @@ WITH
 			, is_on_bench
 			, is_on_ir
 			
-			, CAST(stats #>> '{seasonId}' AS INTEGER) AS season_id
-			, CAST(stats #>> '{scoringPeriodId}' AS INTEGER) AS scoring_period_id
+			, stats #>> '{seasonId}' AS season_id
+			, stats #>> '{scoringPeriodId}' AS scoring_period_id
 			
 			, stats #>> '{id}' AS player_stats_id
 			
@@ -137,139 +126,8 @@ WITH
 		FROM player_stats
 	)
 	
-	-- player_stats_current
-	-- just keep the stats from the current scoring period
-	, player_stats_current AS (
-		SELECT
-			p.roster_id
-			, p.player_id
-			, p.player_full_name
-			, p.position_name
-			, p.position_abbrev
-			, p.is_starter
-			, p.is_on_bench
-			, p.is_on_ir
-			, p.season_id
-			, p.scoring_period_id
-			, p.player_stats_id
-			, p.stat_source_id
-			, p.stat_split_type_id
-			, p.external_id
-			, p.applied_stats
-			
-		FROM player_stats_all p
-		
-		INNER JOIN constants c
-		ON p.roster_id = c.roster_id
-		
-		WHERE p.season_id = c.season_id
-			AND p.scoring_period_id = c.scoring_period_id
-	)
-
-	-- player_stats_current_each
-    -- get each stat its own row
-    , player_stats_current_each AS (
-		SELECT
-			p.roster_id
-			, p.player_id
-			, p.player_full_name
-			, p.position_name
-			, p.position_abbrev
-			, p.is_starter
-			, p.is_on_bench
-			, p.is_on_ir
-			, p.season_id
-			, p.scoring_period_id
-			, p.player_stats_id
-			, p.stat_source_id
-			, p.stat_split_type_id
-			, p.external_id
-			
-			, stats.key AS stat
-			, ROUND(stats.value::NUMERIC, 2) AS points
-			
-		FROM player_stats_current p
-		CROSS JOIN JSONB_EACH_TEXT(applied_stats) stats
-	)
-	
-	-- player_stats_current_each_actual
-    , player_stats_current_each_actual AS (
-		SELECT
-			roster_id
-			, player_id
-			, player_full_name
-			, position_name
-			, position_abbrev
-			, is_starter
-			, is_on_bench
-			, is_on_ir
-			, season_id
-			, scoring_period_id
-			, stat
-			
-			, points AS points_actual
-
-		FROM player_stats_current_each
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '0'
-			AND stat_split_type_id = '1'
-	)
-	
-	-- player_stats_current_each_projected
-    , player_stats_current_each_projected AS (
-		SELECT
-			roster_id
-			, player_id
-			, player_full_name
-			, position_name
-			, position_abbrev
-			, is_starter
-			, is_on_bench
-			, is_on_ir
-			, season_id
-			, scoring_period_id
-			, stat
-			
-			, points AS points_projected
-
-		FROM player_stats_current_each
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '1'
-			AND stat_split_type_id = '1'
-			AND CAST(season_id AS VARCHAR) || CAST(scoring_period_id AS VARCHAR) = external_id
-	)
-	
-	-- player_stats_current_each_actual_and_projected
-	-- get project and actual points into their own columns
-	, player_stats_current_each_actual_and_projected AS (
-		SELECT
-			COALESCE(p.player_id, a.player_id) AS player_id
-			, COALESCE(p.player_full_name, a.player_full_name) AS player_full_name
-			, COALESCE(p.position_name, a.position_name) AS position_name
-			, COALESCE(p.position_abbrev, a.position_abbrev) AS position_abbrev
-			, COALESCE(p.is_starter, a.is_starter) AS is_starter
-			, COALESCE(p.is_on_bench, a.is_on_bench) AS is_on_bench
-			, COALESCE(p.is_on_ir, a.is_on_ir) AS is_on_ir
-			, COALESCE(p.season_id, a.season_id) AS season_id
-			, COALESCE(p.scoring_period_id, a.scoring_period_id) AS scoring_period_id
-			, COALESCE(p.stat, a.stat) AS stat
-			
-			, COALESCE(p.points_projected, 0) AS points_projected
-			, COALESCE(a.points_actual, 0) AS points_actual
-
-		FROM player_stats_current_each_projected p
-
-		FULL OUTER JOIN player_stats_current_each_actual a
-		ON p.roster_id = a.roster_id
-			AND p.player_id = a.player_id
-		AND p.player_full_name = a.player_full_name 
-		AND p.season_id = a.season_id
-		AND p.scoring_period_id = a.scoring_period_id
-		AND p.stat = a.stat
-	)
-	
 	, lutu AS (
-		SELECT * FROM player_stats_current_each_actual_and_projected
+		SELECT * FROM player_stats_all
 	)
 
 SELECT * FROM lutu
