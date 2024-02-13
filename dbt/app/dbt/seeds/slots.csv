@@ -1,0 +1,27 @@
+abbrev,active,bench,canApplyLimitIndividually,display,displayOrder,eligiblePositions,id,injuryRequired,lineupSlotEligible,name,parentId,starter
+QB,True,False,False,True,1,[1],0,False,True,Quarterback,7,True
+TQB,True,False,False,True,2,[15],1,False,True,Team Quarterback,7,True
+RB,True,False,False,True,3,[2],2,False,True,Running Back,3,True
+RB/WR,True,False,False,True,4,"[2, 3]",3,False,True,Running Back/Wide Receiver,7,True
+WR,True,False,False,True,5,[3],4,False,True,Wide Receiver,5,True
+WR/TE,True,False,False,True,6,"[3, 4]",5,False,True,Wide Receiver/Tight End,7,True
+TE,True,False,False,True,7,[4],6,False,True,Tight End,5,True
+OP,True,False,False,True,9,"[1, 2, 3, 4]",7,False,True,Offensive Player Utility,25,True
+DT,True,False,False,True,10,[9],8,False,True,Defensive Tackle,11,True
+DE,True,False,False,True,11,[10],9,False,True,Defensive End,11,True
+LB,True,False,False,True,12,[11],10,False,True,Linebacker,11,True
+DL,True,False,False,True,14,"[9, 10]",11,False,True,Defensive Line,15,True
+CB,True,False,False,True,15,[12],12,False,True,Cornerback,14,True
+S,True,False,False,True,16,[13],13,False,True,Safety,14,True
+DB,True,False,False,True,17,"[12, 13]",14,False,True,Defensive Back,15,True
+DP,True,False,False,True,18,"[9, 10, 11, 12, 13]",15,False,True,Defensive Player Utility,25,True
+D/ST,True,False,False,True,19,[16],16,False,True,Team Defense/Special Teams,25,True
+K,True,False,False,True,20,[5],17,False,True,Place Kicker,7,True
+P,True,False,False,True,21,[7],18,False,True,Punter,7,True
+HC,True,False,False,True,22,[14],19,False,True,Head Coach,25,True
+BE,False,True,False,True,23,"[1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17]",20,False,True,Bench,25,False
+IR,False,False,False,True,24,"[1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17]",21,True,True,Injured Reserve,25,False
+INV,False,False,False,False,25,[],22,False,False,Invalid Player,25,False
+FLEX,True,False,False,True,8,"[2, 3, 4]",23,False,True,Flex,7,True
+EDR,True,False,False,False,13,[17],24,False,True,Edge Rusher,15,True
+ALL,True,False,True,True,0,"[1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17]",25,False,False,All Players,25,False
