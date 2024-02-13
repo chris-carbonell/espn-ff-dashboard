@@ -6,7 +6,7 @@ WITH
 			, request_url
 			, res
 		FROM {{ source('raw', 'team') }}
-		LIMIT {{ var("limit", "NONE") }}
+		LIMIT {{ var("limit", "ALL") }}
 	)
 	
 	-- teams_json

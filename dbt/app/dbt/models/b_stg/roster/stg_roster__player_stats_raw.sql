@@ -12,7 +12,7 @@ WITH
 			, request_url
 			, res
 		FROM {{ source('raw', 'roster') }}
-		LIMIT {{ var("limit", "NONE") }}
+		LIMIT {{ var("limit", "ALL") }}
 	)
 
     , lutu AS (
