@@ -15,6 +15,11 @@ WITH
 			, request_url
 			, res
 		FROM {{ source('raw', 'roster') }}
+		LIMIT {{ var("limit", "NONE") }}
+	)
+	
+	, slots AS (
+		SELECT * FROM {{ ref('slots') }}
 	)
 	
 	-- constants
@@ -74,8 +79,26 @@ WITH
 			roster_id
 			, entries #>> '{playerPoolEntry, player, fullName}' AS player_full_name
 			, entries #>> '{playerPoolEntry, player, id}' AS player_id
+			
+			, s.name AS position_name
+			, s.abbrev AS position_abbrev
+			
+			, CASE
+				WHEN s.abbrev IN ('IR', 'BE') THEN 0
+				ELSE 1
+			END AS is_starter
+			, s.bench AS is_on_bench
+			, CASE
+				WHEN s.abbrev = 'IR' THEN TRUE
+				ELSE FALSE
+			END AS is_on_ir
+			
 			, JSONB_ARRAY_ELEMENTS(entries #> '{playerPoolEntry, player, stats}') AS stats
-		FROM entries
+		
+		FROM entries e
+		
+		LEFT JOIN slots s
+		ON (entries #>> '{lineupSlotId}')::INTEGER = s.id
 	)
 	
 	-- player_stats_all
@@ -85,6 +108,12 @@ WITH
 			roster_id
 			, player_id
 			, player_full_name
+			
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
 			
 			, CAST(stats #>> '{seasonId}' AS INTEGER) AS season_id
 			, CAST(stats #>> '{scoringPeriodId}' AS INTEGER) AS scoring_period_id
@@ -115,6 +144,11 @@ WITH
 			p.roster_id
 			, p.player_id
 			, p.player_full_name
+			, p.position_name
+			, p.position_abbrev
+			, p.is_starter
+			, p.is_on_bench
+			, p.is_on_ir
 			, p.season_id
 			, p.scoring_period_id
 			, p.player_stats_id
@@ -139,6 +173,11 @@ WITH
 			p.roster_id
 			, p.player_id
 			, p.player_full_name
+			, p.position_name
+			, p.position_abbrev
+			, p.is_starter
+			, p.is_on_bench
+			, p.is_on_ir
 			, p.season_id
 			, p.scoring_period_id
 			, p.player_stats_id
@@ -159,6 +198,11 @@ WITH
 			roster_id
 			, player_id
 			, player_full_name
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
 			, season_id
 			, scoring_period_id
 			, stat
@@ -177,6 +221,11 @@ WITH
 			roster_id
 			, player_id
 			, player_full_name
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
 			, season_id
 			, scoring_period_id
 			, stat
@@ -196,6 +245,11 @@ WITH
 		SELECT
 			COALESCE(p.player_id, a.player_id) AS player_id
 			, COALESCE(p.player_full_name, a.player_full_name) AS player_full_name
+			, COALESCE(p.position_name, a.position_name) AS position_name
+			, COALESCE(p.position_abbrev, a.position_abbrev) AS position_abbrev
+			, COALESCE(p.is_starter, a.is_starter) AS is_starter
+			, COALESCE(p.is_on_bench, a.is_on_bench) AS is_on_bench
+			, COALESCE(p.is_on_ir, a.is_on_ir) AS is_on_ir
 			, COALESCE(p.season_id, a.season_id) AS season_id
 			, COALESCE(p.scoring_period_id, a.scoring_period_id) AS scoring_period_id
 			, COALESCE(p.stat, a.stat) AS stat

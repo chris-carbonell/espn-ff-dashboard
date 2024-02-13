@@ -11,13 +11,21 @@ WITH
     -- round points scored
     , clean AS (
         SELECT
-            roster_id
-            , player_id
+            player_id
             , player_full_name
-            , point_type
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
+			, season_id
+			, scoring_period_id
             -- a_seed.stats.id is an integer
             , CAST(stat AS INTEGER) AS stat
-            , ROUND(points::NUMERIC, 2) AS points
+
+            , ROUND(points_projected::NUMERIC, 2) AS points_projected
+            , ROUND(points_actual::NUMERIC, 2) AS points_actual
+
         FROM hilaw
     )
 
