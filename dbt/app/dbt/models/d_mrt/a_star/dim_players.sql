@@ -7,9 +7,21 @@ WITH
     -- dim
     , dim AS (
         SELECT DISTINCT
-            {{ dbt_utils.generate_surrogate_key(['player_id']) }} as player_key
+            {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'player_id']) }} as player_key
+
+            , season_id
+            , scoring_period_id
             , player_id
+            
             , player_full_name
+
+            , position_name
+			, position_abbrev
+
+			, is_starter
+			, is_on_bench
+			, is_on_ir
+
         FROM hilaw
     )
 
