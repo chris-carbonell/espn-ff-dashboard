@@ -21,27 +21,27 @@ WITH
     -- get teams objects into their own rows
     , teams AS (
 		SELECT 
-			roster_id
+			request_id
 			, JSONB_ARRAY_ELEMENTS(JSONB_EXTRACT_PATH(res, 'teams')) AS teams
 		FROM hilaw
 	)
 	
 	-- check_teams
-	-- 12 records for each roster_id
+	-- 12 records for each request_id
 	-- one for each team
 	-- , check_teams AS (
 	-- 	SELECT 
-	-- 		roster_id
+	-- 		request_id
 	-- 		, COUNT(*) AS cnt_records
 	-- 	FROM teams
-	-- 	GROUP BY roster_id
+	-- 	GROUP BY request_id
 	-- )
 	
 	-- entries
     -- get entries into their own rows
     , entries AS (
 		SELECT
-			roster_id
+			request_id
 			, teams #>> '{id}' AS team_id
 			, JSONB_ARRAY_ELEMENTS(teams #> '{roster, entries}') AS entries
 		FROM teams
@@ -53,17 +53,17 @@ WITH
 	-- not all people use all roster spots so this is likely to be less than the max
 	-- , check_entries AS (
 	-- 	SELECT
-	-- 		roster_id
+	-- 		request_id
 	-- 		, COUNT(*) AS cnt_records
 	-- 	FROM entries
-	-- 	GROUP BY roster_id
+	-- 	GROUP BY request_id
 	-- )
 	
 	-- player_stats
 	-- extract stats objects for each player
 	, player_stats AS (
 		SELECT
-			roster_id
+			request_id
 			, team_id
 			, entries #>> '{playerPoolEntry, player, fullName}' AS player_full_name
 			, entries #>> '{playerPoolEntry, player, id}' AS player_id
@@ -84,7 +84,7 @@ WITH
     -- incl. projections and real stats
     , player_stats_all AS (
 		SELECT
-			roster_id
+			request_id
 			, team_id
 			, player_id
 			, player_full_name

@@ -8,7 +8,7 @@ WITH
 
 	hilaw AS (
 		SELECT
-			roster_id
+			request_id
 			, request_url
 			, res
 		FROM {{ source('raw', 'roster') }}
