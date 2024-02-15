@@ -55,7 +55,17 @@ def main():
 
     # update raw
     for season_id in season_ids:
-        for scoring_period in list(range(1, 18)):
+
+        # get number of scoring periods
+        # in 2020, we only had 16 (after that, we had 17)
+
+        url = f"https://fantasy.espn.com/apis/v3/games/ffl/seasons/{season_id}/segments/0/leagues/{league_id}"
+        params = {'view': "mSettings"}
+        res = requests.get(url, params = params, cookies = cookies)
+
+        final_scoring_period = int(res['status']['firstScoringPeriod'])
+
+        for scoring_period in list(range(1, final_scoring_period + 1)):
             for view in ["mTeam", "mRoster", "mMatchup", "mMatchupScore", "mSettings", "mStandings"]:
                 update_raw(engine, cookies, league_id, season_id, scoring_period, view)
 
