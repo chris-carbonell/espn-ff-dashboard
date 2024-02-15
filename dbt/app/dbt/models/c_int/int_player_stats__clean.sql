@@ -23,16 +23,24 @@ WITH
 	, player_stats_current AS (
 		SELECT
 			h.roster_id
-			, h.team_id
+			, CAST(h.team_id AS INTEGER) AS team_id
 			, h.player_id
 			, h.player_full_name
 			, h.position_name
 			, h.position_abbrev
-			, h.is_starter
+
+			, CASE
+				WHEN h.position_abbrev IN ('IR', 'BE') THEN 0
+				ELSE 1
+			END AS is_starter
 			, h.is_on_bench
-			, h.is_on_ir
-			, h.season_id
-			, h.scoring_period_id
+			, CASE
+				WHEN h.position_abbrev = 'IR' THEN TRUE
+				ELSE FALSE
+			END AS is_on_ir
+
+			, CAST(h.season_id AS INTEGER) AS season_id
+			, CAST(h.scoring_period_id AS INTEGER) AS scoring_period_id
 			, h.player_stats_id
 			, h.stat_source_id
 			, h.stat_split_type_id
@@ -68,7 +76,7 @@ WITH
 			, p.stat_split_type_id
 			, p.external_id
 			
-			, stats.key AS stat
+			, CAST(stats.key AS INTEGER) AS stat_id
 
 			, ROUND(stats.value::NUMERIC, 2) AS points
 			
@@ -90,7 +98,7 @@ WITH
 			, is_on_ir
 			, season_id
 			, scoring_period_id
-			, stat
+			, stat_id
 			
 			, points AS points_actual
 
@@ -114,7 +122,7 @@ WITH
 			, is_on_ir
 			, season_id
 			, scoring_period_id
-			, stat
+			, stat_id
 			
 			, points AS points_projected
 
@@ -139,7 +147,7 @@ WITH
 			, COALESCE(p.is_on_ir, a.is_on_ir) AS is_on_ir
 			, COALESCE(p.season_id, a.season_id) AS season_id
 			, COALESCE(p.scoring_period_id, a.scoring_period_id) AS scoring_period_id
-			, COALESCE(p.stat, a.stat) AS stat
+			, COALESCE(p.stat_id, a.stat_id) AS stat_id
 			
 			, COALESCE(p.points_projected, 0) AS points_projected
 			, COALESCE(a.points_actual, 0) AS points_actual
@@ -153,25 +161,29 @@ WITH
 			AND p.player_full_name = a.player_full_name 
 			AND p.season_id = a.season_id
 			AND p.scoring_period_id = a.scoring_period_id
-			AND p.stat = a.stat
+			AND p.stat_id = a.stat_id
 	)
 
     -- clean
     -- round points scored
     , clean AS (
         SELECT
-            team_id
+            season_id
+			, scoring_period_id
+
+			, team_id
+
 			, player_id
             , player_full_name
 			, position_name
 			, position_abbrev
+
 			, is_starter
 			, is_on_bench
 			, is_on_ir
-			, season_id
-			, scoring_period_id
+			
             -- a_seed.stats.id is an integer
-            , CAST(stat AS INTEGER) AS stat
+            , stat_id
 
             , ROUND(points_projected::NUMERIC, 2) AS points_projected
             , ROUND(points_actual::NUMERIC, 2) AS points_actual

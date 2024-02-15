@@ -70,16 +70,7 @@ WITH
 			
 			, s.name AS position_name
 			, s.abbrev AS position_abbrev
-			
-			, CASE
-				WHEN s.abbrev IN ('IR', 'BE') THEN 0
-				ELSE 1
-			END AS is_starter
 			, s.bench AS is_on_bench
-			, CASE
-				WHEN s.abbrev = 'IR' THEN TRUE
-				ELSE FALSE
-			END AS is_on_ir
 			
 			, JSONB_ARRAY_ELEMENTS(entries #> '{playerPoolEntry, player, stats}') AS stats
 		
@@ -100,9 +91,7 @@ WITH
 			
 			, position_name
 			, position_abbrev
-			, is_starter
 			, is_on_bench
-			, is_on_ir
 			
 			, stats #>> '{seasonId}' AS season_id
 			, stats #>> '{scoringPeriodId}' AS scoring_period_id
