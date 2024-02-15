@@ -30,6 +30,13 @@ WITH
             , team_points
             , opponent_points
 
+            -- power rankings
+            , power_rank_team_wins
+            , power_rank_team_losses
+            , power_rank_team_ties
+            , power_rank_win_pct
+            , power_rank
+
         FROM hilaw
     )
 

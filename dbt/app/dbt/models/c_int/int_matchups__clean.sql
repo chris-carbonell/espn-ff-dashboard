@@ -127,6 +127,8 @@ WITH
     	FROM matchups
     )
     
+    -- matchups_stacked
+    -- concatenate home and away perspectives
     , matchups_stacked AS (
     	(
 	    	SELECT * FROM matchups_home
@@ -135,9 +137,46 @@ WITH
     	)
     	ORDER BY season_id, scoring_period_id, schedule_id, team_id
     )
+
+    -- matchups_power_rankings
+    -- calculate round robin win/loss/tie stats for power rankings
+    , matchups_power_rankings AS (
+        SELECT
+            *
+
+            -- power rank
+            -- if each team played every other team, what would their record be?
+            -- RANK() properly handles ties (e.g., same score gets same rank)
+            , RANK() OVER(PARTITION BY season_id, scoring_period_id ORDER BY team_points ASC) - 1 AS power_rank_team_wins
+            , RANK() OVER(PARTITION BY season_id, scoring_period_id ORDER BY team_points DESC) - 1 AS power_rank_team_losses
+            , COUNT(*) OVER(PARTITION BY season_id, scoring_period_id, team_points) - 1 AS power_rank_team_ties
+        
+        FROM matchups_stacked
+    )
+
+    -- matchups_win_pct
+    -- calculate power ranking win percentage
+    , matchups_win_pct AS (
+        SELECT
+            *
+            -- power rankings win percentage
+            -- for power rankings, each week, each team plays every other team (11 teams)
+            , (power_rank_team_wins + 0.5 * power_rank_team_ties) / 11 AS power_rank_win_pct
+        FROM matchups_power_rankings
+    )
+
+    -- matchups_win_pct_ranks
+    -- calculate power rankings based on win percentage
+    , matchups_win_pct_ranks AS (
+        SELECT
+            *
+            -- power rankings based on win percentage
+            , RANK() OVER(PARTITION BY season_id, scoring_period_id ORDER BY power_rank_win_pct DESC) AS power_rank
+        FROM matchups_win_pct
+    )
 	
     , lutu AS (
-        SELECT * FROM matchups_stacked
+        SELECT * FROM matchups_win_pct_ranks
     )
 
 SELECT * FROM lutu
