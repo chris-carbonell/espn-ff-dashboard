@@ -50,7 +50,7 @@ WITH
 	)
 	
 	, lutu AS (
-		SELECT * FROM schedules
+		SELECT * FROM matchups
 	)
 	
 SELECT * FROM lutu

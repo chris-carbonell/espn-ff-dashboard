@@ -7,28 +7,28 @@ WITH
     -- dim
     , dim AS (
         SELECT DISTINCT
-            {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'schedule_id']) }} as matchup_key
+            {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'team_id']) }} as matchup_key
 
 			-- info
 			, season_id
 			, scoring_period_id
-			, schedule_id
+            , schedule_id
+			, team_id
+            , opponent_team_id
 
             -- categories
             , matchup_playoff_tier_type
             , is_regular_season
             , is_playoffs
 
-            -- winner
-            , matchup_winner_team_id
+            -- win/loss/tie
+            , team_won
+            , team_lost
+            , team_tied
 
-            -- home
-			, matchup_home_team_id
-			, matchup_home_total_points
-			
-			-- away
-			, matchup_away_team_id
-			, matchup_away_total_points
+            -- points
+            , team_points
+            , opponent_points
 
         FROM hilaw
     )

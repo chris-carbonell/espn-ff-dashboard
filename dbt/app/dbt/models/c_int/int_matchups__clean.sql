@@ -26,11 +26,11 @@ WITH
 			
 			-- home
 			, CAST(matchup_home_team_id AS INTEGER) AS matchup_home_team_id
-			, CAST(matchup_home_total_points AS INTEGER) AS matchup_home_total_points
+			, ROUND(matchup_home_total_points::NUMERIC, 2) AS matchup_home_total_points
 			
 			-- away
             , CAST(matchup_away_team_id AS INTEGER) AS matchup_away_team_id
-            , CAST(matchup_away_total_points AS INTEGER) AS matchup_away_total_points
+            , ROUND(matchup_away_total_points::NUMERIC, 2) AS matchup_away_total_points
 		
         FROM hilaw
 
@@ -38,42 +38,106 @@ WITH
         -- so just keep the relevant matchups for each scoring period
         WHERE scoring_period_id = matchup_period_id
 	)
-
-    -- matchup_winners
-    -- determine winners
-    , matchup_winners AS (
-        SELECT
-            -- info
-			, season_id
+    
+    -- matchups_home
+    -- get W/L determination from perspective of home team
+    , matchups_home AS (
+    	SELECT
+    		-- info
+			season_id
 			, scoring_period_id
 			, schedule_id
+			, matchup_home_team_id AS team_id
 
             -- categories
             , matchup_playoff_tier_type
             , is_regular_season
             , is_playoffs
-
-            -- winner
+            
+            -- opponent
+            , matchup_away_team_id AS opponent_team_id
+            
+            -- win/loss
             , CASE
-                WHEN UPPER(matchup_winner) = 'HOME' THEN matchup_home_team_id
-                WHEN UPPER(matchup_winner) = 'AWAY' THEN matchup_away_team_id
+                WHEN UPPER(matchup_winner) = 'HOME' THEN 1
+                WHEN UPPER(matchup_winner) = 'AWAY' THEN 0
                 WHEN UPPER(matchup_winner) = 'UNDECIDED' THEN NULL  -- in the playoff bye weeks, the teams are designated as home
                 ELSE NULL
-            END AS matchup_winner_team_id
-
-            -- home
-			, matchup_home_team_id
-			, matchup_home_total_points
-			
-			-- away
-			, matchup_away_team_id
-			, matchup_away_total_points
+            END AS team_won
+            , CASE
+                WHEN UPPER(matchup_winner) = 'HOME' THEN 0
+                WHEN UPPER(matchup_winner) = 'AWAY' THEN 1
+                WHEN UPPER(matchup_winner) = 'UNDECIDED' THEN NULL  -- in the playoff bye weeks, the teams are designated as home
+                ELSE NULL
+            END AS team_lost
+            , CASE
+                WHEN UPPER(matchup_winner) IN ('HOME', 'AWAY') THEN 0
+                WHEN matchup_home_total_points = matchup_away_total_points THEN 1
+                ELSE 0
+            END AS team_tied
             
-        FROM matchups
+            -- points
+            , matchup_home_total_points AS team_points
+            , matchup_away_total_points AS opponent_points
+            
+    	FROM matchups
+    )
+    
+    -- matchups_away
+    -- get W/L determination from perspective of away team
+    , matchups_away AS (
+    	SELECT
+    		-- info
+			season_id
+			, scoring_period_id
+			, schedule_id
+			, matchup_away_team_id AS team_id
+
+            -- categories
+            , matchup_playoff_tier_type
+            , is_regular_season
+            , is_playoffs
+            
+            -- opponent
+            , matchup_home_team_id AS opponent_team_id
+            
+            -- win/loss
+            , CASE
+                WHEN UPPER(matchup_winner) = 'HOME' THEN 0
+                WHEN UPPER(matchup_winner) = 'AWAY' THEN 1
+                WHEN UPPER(matchup_winner) = 'UNDECIDED' THEN NULL  -- in the playoff bye weeks, the teams are designated as home
+                ELSE NULL
+            END AS team_won
+            , CASE
+                WHEN UPPER(matchup_winner) = 'HOME' THEN 1
+                WHEN UPPER(matchup_winner) = 'AWAY' THEN 0
+                WHEN UPPER(matchup_winner) = 'UNDECIDED' THEN NULL  -- in the playoff bye weeks, the teams are designated as home
+                ELSE NULL
+            END AS team_lost
+            , CASE
+                WHEN UPPER(matchup_winner) IN ('HOME', 'AWAY') THEN 0
+                WHEN matchup_home_total_points = matchup_away_total_points THEN 1
+                ELSE 0
+            END AS team_tied
+            
+            -- points
+            , matchup_away_total_points AS team_points
+            , matchup_home_total_points AS opponent_points
+            
+    	FROM matchups
+    )
+    
+    , matchups_stacked AS (
+    	(
+	    	SELECT * FROM matchups_home
+	    	UNION ALL
+	    	SELECT * FROM matchups_away
+    	)
+    	ORDER BY season_id, scoring_period_id, schedule_id, team_id
     )
 	
     , lutu AS (
-        SELECT * FROM matchup_winners
+        SELECT * FROM matchups_stacked
     )
 
 SELECT * FROM lutu

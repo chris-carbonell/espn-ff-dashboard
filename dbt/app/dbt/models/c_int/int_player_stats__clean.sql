@@ -12,7 +12,7 @@ WITH
 	-- to help identify the current scoring period's stats
 	, constants AS (
 		SELECT
-			roster_id
+			request_id
 			, CAST(res #>> '{seasonId}' AS INTEGER) AS season_id
 			, CAST(res #>> '{scoringPeriodId}' AS INTEGER) AS scoring_period_id
 		FROM {{ ref("stg_roster__player_stats_raw") }}
@@ -22,7 +22,7 @@ WITH
 	-- just keep the stats from the current scoring period
 	, player_stats_current AS (
 		SELECT
-			h.roster_id
+			h.request_id
 			, CAST(h.team_id AS INTEGER) AS team_id
 			, h.player_id
 			, h.player_full_name
@@ -50,7 +50,7 @@ WITH
 		FROM hilaw h
 		
 		INNER JOIN constants c
-		ON h.roster_id = c.roster_id
+		ON h.request_id = c.request_id
 		
 		WHERE CAST(h.season_id AS INTEGER) = c.season_id
 			AND CAST(h.scoring_period_id AS INTEGER) = c.scoring_period_id
@@ -60,7 +60,7 @@ WITH
     -- get each stat its own row
     , player_stats_current_each AS (
 		SELECT
-			p.roster_id
+			p.request_id
 			, p.team_id
 			, p.player_id
 			, p.player_full_name
@@ -87,7 +87,7 @@ WITH
 	-- player_stats_current_each_actual
     , player_stats_current_each_actual AS (
 		SELECT
-			roster_id
+			request_id
 			, team_id
 			, player_id
 			, player_full_name
@@ -111,7 +111,7 @@ WITH
 	-- player_stats_current_each_projected
     , player_stats_current_each_projected AS (
 		SELECT
-			roster_id
+			request_id
 			, team_id
 			, player_id
 			, player_full_name
@@ -155,7 +155,7 @@ WITH
 		FROM player_stats_current_each_projected p
 
 		FULL OUTER JOIN player_stats_current_each_actual a
-		ON p.roster_id = a.roster_id
+		ON p.request_id = a.request_id
 			AND p.team_id = a.team_id
 			AND p.player_id = a.player_id
 			AND p.player_full_name = a.player_full_name 
