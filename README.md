@@ -25,7 +25,16 @@
 # Roadmap
 * create OBT from star
     * https://docs.getdbt.com/blog/kimball-dimensional-model
+* get draft data
+    * https://jman4190.medium.com/how-to-use-python-with-the-espn-fantasy-draft-api-ecde38621b1b
+    * pick for each player
+    * identify keepers
+    * can we get ALL players? via `&view=players_wl`
+    * anything good here? `&view=proTeamSchedules_wl`
+    * get pick order! mSettings, settings, draftSettings, pickorder
 * create documentation via yamls
+* cluster players
+    * maybe set up airflow first
 * get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
 * mRoster
     * playerPoolEntry.player.ownership.auctionValueAverage
