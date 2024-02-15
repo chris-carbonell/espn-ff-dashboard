@@ -15,6 +15,10 @@ WITH
 		SELECT
 			request_id
 			, request_url
+
+			, res #>> '{seasonId}' AS season_id
+			, res #>> '{scoringPeriodId}' AS scoring_period_id
+
 			, JSONB_ARRAY_ELEMENTS(JSONB_EXTRACT_PATH(res, 'teams')) AS team_json
 			
 		FROM hilaw
@@ -27,14 +31,17 @@ WITH
 		SELECT
 			request_id
 			, request_url
+
+			, season_id
+			, scoring_period_id
 			
 			, team_json #>> '{id}' AS team_id
 			, team_json #>> '{logo}' AS team_logo
 			, team_json #>> '{name}' AS team_name
 			, team_json #>> '{name}' AS team_abbrev
 			-- multiple members could own the team but, for the league I care about, only one member owns each team
-			-- , team_json #> '{owners}' ->> 0 AS team_owner
-			, team_json #>> '{primaryOwner}' AS team_owner
+			-- , team_json #> '{owners}' ->> 0 AS team_owner_member_id
+			, team_json #>> '{primaryOwner}' AS team_owner_member_id
 			
 			-- record
 			, team_json #>> '{record, overall, ties}' AS team_record_ties

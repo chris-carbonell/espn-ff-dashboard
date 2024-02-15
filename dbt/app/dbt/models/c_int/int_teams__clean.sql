@@ -1,19 +1,21 @@
 WITH
 
 	hilaw AS (
-		SELECT * FROM {{ ref('stg_team__team_info') }}
+		SELECT * FROM {{ ref('stg_team__teams') }}
 	)
 	
     -- teams
 	, teams AS (
 		SELECT
-			team_id
+			CAST(season_id AS INTEGER) AS season_id
+			, CAST(scoring_period_id AS INTEGER) AS scoring_period_id
+			, CAST(team_id AS INTEGER) AS team_id
 
 			-- team info
 			, team_logo
 			, team_name
 			, team_abbrev
-			, team_owner
+			, team_owner_member_id
 			
 			-- record
 			, team_record_ties
