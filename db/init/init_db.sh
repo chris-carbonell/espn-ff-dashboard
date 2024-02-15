@@ -20,12 +20,12 @@ EOSQL
 function create_table_for_view {
     execute """
         CREATE TABLE IF NOT EXISTS a_raw.${1} (
-            ${1}_id SERIAL,
+            request_id SERIAL,
             ts_load TIMESTAMP,
             request_url VARCHAR,
             status_code INT,
             res JSONB,
-            PRIMARY KEY (${1}_id, ts_load)
+            PRIMARY KEY (request_id, ts_load)
         )
         """
 }
@@ -34,7 +34,7 @@ function create_table_for_view {
 execute "CREATE SCHEMA a_raw"
 
 # create tables for views
-declare -a views=("team" "roster" "matchup" "settings" "standings")
+declare -a views=("team" "roster" "matchup" "matchup_score" "settings" "standings")
 for i in "${views[@]}"
 do
    create_table_for_view "$i"

@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import logging
 import os
+import re
 
 # data
 import requests
@@ -187,8 +188,14 @@ def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_pe
     request latest data and insert if new
     '''
 
+    def _camel_to_snake(name):
+        '''
+        convert camel case (MatchupScore) to snake case (matchup_score)
+        '''
+        return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
+
     # parse
-    table = view[1:].lower()  # views start with "m" so chop it off
+    table = _camel_to_snake(view[1:])  # views start with "m" so chop it off
 
     # get res
     url = f"https://fantasy.espn.com/apis/v3/games/ffl/seasons/{season_id}/segments/0/leagues/{league_id}"

@@ -9,6 +9,7 @@ sources:
     schema: a_raw
     tables:
       - name: matchup
+      - name: matchup_score
       - name: roster
       - name: settings
       - name: standings

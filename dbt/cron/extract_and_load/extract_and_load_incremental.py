@@ -48,8 +48,8 @@ def main():
     # update raw
     league_id = config_league['league']['league_id']
     # update raw
-    for scoring_period in list(range(1, 17)):
-        for view in ["mTeam", "mRoster", "mMatchup", "mSettings", "mStandings"]:
+    for scoring_period in list(range(1, 18)):
+        for view in ["mTeam", "mRoster", "mMatchup", "mMatchupScore", "mSettings", "mStandings"]:
             update_raw(engine, cookies, league_id, season_id, scoring_period, view)
 
 if __name__ == "__main__":
