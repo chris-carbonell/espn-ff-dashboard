@@ -25,8 +25,9 @@
 # Roadmap
 * create OBT from star
 * get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
-* save data['teams']
-    * we'll need to decode teamId
+* mRoster
+    * playerPoolEntry.player.ownership.auctionValueAverage
+    * playerPoolEntry.player.ownership.averageDraftPosition
 * save data['settings']['scoringSettings']['scoringItems']
     * can we recalculate scores from the ground up? the total points are provided
     * parsing loop<br>https://github.com/cwendt94/espn-api/blob/81f6d2f8a4dbb5715041d101ae76fb0dcd9e239c/espn_api/football/settings.py#L8
