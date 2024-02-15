@@ -6,12 +6,14 @@
 # Quickstart
 # * build with `./ffd.sh -b`
 # * get dbt container's terminal with `./ffd.sh -dit`
+# * extract initial data with `./ffd.sh -ed`
 
 # set defaults
 
 BUILD_PROJECT=false
 DOWN_PROJECT=false
 GET_DBT=false
+EXTRACT_DATA=false
 
 # parse args
 
@@ -29,6 +31,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -dit|--dbt-terminal)
       GET_DBT=true
+      shift # past argument
+      ;;
+    -ed|--extract-data)
+      EXTRACT_DATA=true
       shift # past argument
       ;;
     -*|--*)
@@ -60,4 +66,10 @@ fi
 if $GET_DBT ; then
     echo "entering dbt terminal"
     docker exec -it ffd-dbt /bin/bash
+fi
+
+# extracxt data
+if $EXTRACT_DATA ; then
+    echo "extracting initial data"
+    docker exec -it ffd-dbt python /home/update/extract_and_load/extract_and_load_initial.py
 fi
