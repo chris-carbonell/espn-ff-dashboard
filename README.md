@@ -24,6 +24,8 @@
 
 # Roadmap
 * create OBT from star
+    * https://docs.getdbt.com/blog/kimball-dimensional-model
+* create documentation via yamls
 * get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
 * mRoster
     * playerPoolEntry.player.ownership.auctionValueAverage
