@@ -60,6 +60,8 @@ WITH
 			, m.power_rank_win_pct
 			
 			, SUM(fp.points_actual) AS points_actual
+			, m.team_points
+			, m.opponent_points
 		
 		FROM d_mrt.fct_points fp 
 		
@@ -93,6 +95,8 @@ WITH
 			, m.power_rank_team_losses
 			, m.power_rank_team_ties
 			, m.power_rank_win_pct
+			, m.team_points
+			, m.opponent_points
 			
 		ORDER BY
 			t.season_id
@@ -104,7 +108,7 @@ WITH
 	, stats_all_time AS (
 		SELECT
 			*
-			, RANK() OVER(ORDER BY power_rank_win_pct DESC, points_actual DESC) AS power_ranking
+			, RANK() OVER(ORDER BY power_rank_win_pct DESC, points_for DESC) AS power_ranking
 		FROM (
 			SELECT
 				member_name
@@ -112,7 +116,9 @@ WITH
 				
 				-- actual
 				
-				, ROUND(SUM(points_actual)::NUMERIC, 0) AS points_actual
+				-- , ROUND(SUM(points_actual)::NUMERIC, 0) AS points_actual  -- this matches points_for
+				, ROUND(SUM(team_points)::NUMERIC, 0) AS points_for
+				, ROUND(SUM(opponent_points)::NUMERIC, 0) AS points_against
 
 				-- , SUM(m.team_won) AS team_wins
 				-- , SUM(m.team_lost) AS team_losses
