@@ -27,8 +27,8 @@ WITH
         SELECT * FROM {{ ref('dim_teams') }}
     )
 
-    , dim_time AS (
-        SELECT * FROM {{ ref('dim_time') }}
+    , dim_times AS (
+        SELECT * FROM {{ ref('dim_times') }}
     )
 
     -- obt
@@ -70,7 +70,7 @@ WITH
                 "season_id"	, "scoring_period_id",
             ]) }}
 
-            , {{ dbt_utils.star(from=ref('dim_time'), relation_alias='t', except=[
+            , {{ dbt_utils.star(from=ref('dim_times'), relation_alias='t', except=[
                 "time_key",
             ]) }}
         
@@ -91,7 +91,7 @@ WITH
         LEFT JOIN dim_teams tm
         ON fct.team_key = tm.team_key
 
-        LEFT JOIN dim_time t
+        LEFT JOIN dim_times t
         ON fct.time_key = t.time_key
     )
 

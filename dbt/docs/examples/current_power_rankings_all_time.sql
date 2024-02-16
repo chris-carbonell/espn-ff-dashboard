@@ -17,7 +17,7 @@ WITH
 			time_key
 			, season_id
 			, scoring_period_id
-		FROM d_mrt.dim_time
+		FROM d_mrt.dim_times
 		ORDER BY season_id DESC, scoring_period_id DESC
 		LIMIT 1
 	)
@@ -34,7 +34,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp
 
-		LEFT JOIN d_mrt.dim_time t
+		LEFT JOIN d_mrt.dim_times t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_members mem
@@ -66,7 +66,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp 
 		
-		LEFT JOIN d_mrt.dim_time t
+		LEFT JOIN d_mrt.dim_times t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_matchups m

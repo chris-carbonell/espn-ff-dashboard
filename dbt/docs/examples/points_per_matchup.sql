@@ -9,7 +9,7 @@ SELECT
 
 FROM d_mrt.fct_points fp 
 
-LEFT JOIN d_mrt.dim_time t
+LEFT JOIN d_mrt.dim_times t
 ON fp.time_key = t.time_key
 
 LEFT JOIN d_mrt.dim_matchups m

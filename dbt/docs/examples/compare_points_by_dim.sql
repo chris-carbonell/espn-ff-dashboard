@@ -52,7 +52,7 @@ WITH
 		
 		FROM fct fp
 		
-		LEFT JOIN d_mrt.dim_time t
+		LEFT JOIN d_mrt.dim_times t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN dim
