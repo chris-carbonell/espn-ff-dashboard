@@ -80,7 +80,8 @@ WITH
 		LEFT JOIN current_owners co
 		ON mem.member_id = co.member_id
 		
-		WHERE dp.is_starter = 1
+		WHERE is_regular_season = 1
+			AND dp.is_starter = 1
 			AND co.member_id IS NOT NULL
 		
 		GROUP BY
