@@ -146,7 +146,11 @@ WITH
 	, stats_all_time_luck AS (
 		SELECT
 			*
-			, 100 * ROUND(((actual_win_pct - power_rank_win_pct + 100) / 200)::NUMERIC, 2) AS luck 
+			-- luck
+			-- luck < 0: not lucky
+			-- luck > 0: lucky
+			-- luck = 0: neither lucky nor unlucky
+			, 100 * ROUND(((actual_win_pct - power_rank_win_pct) / 200)::NUMERIC, 2) AS luck
 		FROM stats_all_time
 	)
 	
