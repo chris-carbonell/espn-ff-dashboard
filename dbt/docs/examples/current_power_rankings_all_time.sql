@@ -1,12 +1,3 @@
--- # Overview
--- calculate power rankings for the set of current owners
-
--- # Notes
--- * power rankings are based on the win percentage of round robin games
---     * i.e., each team plays every other team each week
--- * I chose win percentage because members can join at different times throughout the seasons
---     * so, for example, total wins would be biased towards members that have been in the league longer
-
 WITH
 
 	-- current_scoring_period
@@ -17,7 +8,7 @@ WITH
 			time_key
 			, season_id
 			, scoring_period_id
-		FROM d_mrt.dim_times
+		FROM d_mrt.dim_time
 		ORDER BY season_id DESC, scoring_period_id DESC
 		LIMIT 1
 	)
@@ -34,7 +25,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp
 
-		LEFT JOIN d_mrt.dim_times t
+		LEFT JOIN d_mrt.dim_time t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_members mem
@@ -46,17 +37,23 @@ WITH
 		WHERE fp.time_key = (SELECT time_key FROM current_scoring_period)
 	)
 	
-	-- power_ranks_sp
+	-- stats_scoring_period
 	-- power rank stats by scoring period
 	-- so we can easily roll up
-	, power_ranks_sp AS (
+	, stats_scoring_period AS (
 		SELECT
 			t.season_id
 			, t.scoring_period_id
 			
 			, co.member_name
 			, co.team_name
+
+			-- actual
+			, m.team_won
+			, m.team_lost
+			, m.team_tied
 			
+			-- power rank
 			, m.power_rank_team_wins
 			, m.power_rank_team_losses
 			, m.power_rank_team_ties
@@ -66,7 +63,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp 
 		
-		LEFT JOIN d_mrt.dim_times t
+		LEFT JOIN d_mrt.dim_time t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_matchups m
@@ -89,6 +86,9 @@ WITH
 			, t.scoring_period_id
 			, co.member_name
 			, co.team_name
+			, m.team_won
+			, m.team_lost
+			, m.team_tied
 			, m.power_rank_team_wins
 			, m.power_rank_team_losses
 			, m.power_rank_team_ties
@@ -100,26 +100,35 @@ WITH
 			, m.power_rank_win_pct DESC
 	)
 	
-	-- power_ranks_all_time
-	-- power ranks all time
-	, power_ranks_all_time AS (
+	-- stats_all_time
+	, stats_all_time AS (
 		SELECT
 			*
-			, RANK() OVER(ORDER BY win_pct DESC, points_actual DESC) AS power_ranking
+			, RANK() OVER(ORDER BY power_rank_win_pct DESC, points_actual DESC) AS power_ranking
 		FROM (
 			SELECT
 				member_name
 				, team_name
 				
-				, SUM(power_rank_team_wins) AS power_rank_team_wins	
-				, SUM(power_rank_team_losses) AS power_rank_team_losses
-				, SUM(power_rank_team_ties) AS power_rank_team_ties
+				-- actual
 				
-				, SUM(points_actual) AS points_actual
+				, ROUND(SUM(points_actual)::NUMERIC, 0) AS points_actual
+
+				-- , SUM(m.team_won) AS team_wins
+				-- , SUM(m.team_lost) AS team_losses
+				-- , SUM(m.team_tied) AS team_ties
+				, SUM(team_won) || '-' || SUM(team_lost) || '-' || SUM(team_tied) AS actual_win_loss
+				, 100 * ROUND((SUM(team_won) + 0.5 * SUM(team_tied)) / (SUM(team_won) + SUM(team_lost) + SUM(team_tied))::NUMERIC, 2) AS actual_win_pct
+
+				-- power rankings
 				
-				, ROUND((SUM(power_rank_team_wins) + 0.5 * SUM(power_rank_team_ties)) / (SUM(power_rank_team_wins) + SUM(power_rank_team_losses) + SUM(power_rank_team_ties))::NUMERIC, 3) AS win_pct
+				-- , SUM(power_rank_team_wins) AS power_rank_team_wins	
+				-- , SUM(power_rank_team_losses) AS power_rank_team_losses
+				-- , SUM(power_rank_team_ties) AS power_rank_team_ties
+				, SUM(power_rank_team_wins) || '-' || SUM(power_rank_team_losses) || '-' || SUM(power_rank_team_ties) AS power_rank_win_loss
+				, 100 * ROUND((SUM(power_rank_team_wins) + 0.5 * SUM(power_rank_team_ties)) / (SUM(power_rank_team_wins) + SUM(power_rank_team_losses) + SUM(power_rank_team_ties))::NUMERIC, 2) AS power_rank_win_pct
 			
-			FROM power_ranks_sp
+			FROM stats_scoring_period
 			
 			GROUP BY
 				member_name
@@ -127,8 +136,15 @@ WITH
 		) t
 	)
 	
+	, stats_all_time_luck AS (
+		SELECT
+			*
+			, 100 * ROUND(((actual_win_pct - power_rank_win_pct + 100) / 200)::NUMERIC, 2) AS luck 
+		FROM stats_all_time
+	)
+	
 	, lutu AS (
-		SELECT * FROM power_ranks_all_time pr
+		SELECT * FROM stats_all_time_luck
 	)
 	
 SELECT * FROM lutu
