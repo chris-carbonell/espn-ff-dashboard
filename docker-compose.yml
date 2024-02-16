@@ -56,6 +56,29 @@ services:
     networks:
       - ffd
 
+  # app
+  app:
+    build:
+      context: ./app
+      
+    container_name: ${PROJECT_ABBREV}-app
+
+    # volumes:
+    #   - ./app/app:/usr/app
+
+    env_file:
+      - .env
+
+    ports:
+      - "${APP_PORT}:80"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - ffd
+
   # jupyterlab
   lab:
     build: ./lab
