@@ -25,6 +25,10 @@
 # Roadmap
 * create OBT from star
     * https://docs.getdbt.com/blog/kimball-dimensional-model
+* metrics
+    * close games (loser_points + 5 <= winner_points)
+    * management efficiency (actual_starter_points / best_starter_points)
+* create ERD
 * get draft data
     * https://jman4190.medium.com/how-to-use-python-with-the-espn-fantasy-draft-api-ecde38621b1b
     * pick for each player
