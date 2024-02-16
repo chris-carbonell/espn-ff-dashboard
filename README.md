@@ -23,8 +23,6 @@
     * if each team played every other team, what would their record be?
 
 # Roadmap
-* create OBT from star
-    * https://docs.getdbt.com/blog/kimball-dimensional-model
 * metrics
     * close games (loser_points + 5 <= winner_points)
     * management efficiency (actual_starter_points / best_starter_points)
@@ -37,6 +35,7 @@
     * anything good here? `&view=proTeamSchedules_wl`
     * get pick order! mSettings, settings, draftSettings, pickorder
 * create documentation via yamls
+    * add tests too
 * cluster players
     * maybe set up airflow first
 * get logs from data.py outputting to dbt's logs? we should see f"{table}: {insert}"
