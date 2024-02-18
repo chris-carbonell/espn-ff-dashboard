@@ -25,8 +25,8 @@ WITH
 			
 			, pro_teams #>> '{name}' AS pro_team_name
 			, pro_teams #>> '{abbrev}' AS pro_team_abbrev
-			, pro_teams #> '{byeWeek}' AS pro_team_bye_week
-			, pro_teams #> '{id}' AS pro_team_id
+			, pro_teams #>> '{byeWeek}' AS pro_team_bye_week
+			, pro_teams #>> '{id}' AS pro_team_id
 			, pro_teams #>> '{location}' AS pro_team_location
 			
 			, JSONB_ARRAY_ELEMENTS(schedules.value) AS game
@@ -36,17 +36,17 @@ WITH
 		CROSS JOIN JSONB_EACH(pro_teams #> '{proGamesByScoringPeriod}') AS schedules
 	)
 	
-	-- controls_schedules_game_count 
-	-- check to make sure each team in each season has the appropriate number of games
-	, controls_schedules_game_count AS (
-		SELECT 
-			season_id
-			, pro_team_abbrev
-			, COUNT(*) AS cnt_records
-		FROM schedules
-		GROUP BY 1, 2
-		ORDER BY 1, 2
-	)
+	-- -- controls_schedules_game_count 
+	-- -- check to make sure each team in each season has the appropriate number of games
+	-- , controls_schedules_game_count AS (
+	-- 	SELECT 
+	-- 		season_id
+	-- 		, pro_team_abbrev
+	-- 		, COUNT(*) AS cnt_records
+	-- 	FROM schedules
+	-- 	GROUP BY 1, 2
+	-- 	ORDER BY 1, 2
+	-- )
 	
 	, games AS (
 		SELECT
@@ -64,26 +64,26 @@ WITH
 			, s.pro_team_bye_week 
 			
 			-- games
-			, game #> '{scoringPeriodId}' AS scoring_period_id
-			, game #> '{id}' AS game_id
-			, game #> '{date}' AS dt_game
-			, game #> '{homeProTeamId}' AS pro_team_id_home
-			, game #> '{awayProTeamId}' AS pro_team_id_away
+			, game #>> '{scoringPeriodId}' AS scoring_period_id
+			, game #>> '{id}' AS game_id
+			, game #>> '{date}' AS epoch_game
+			, game #>> '{homeProTeamId}' AS pro_team_id_home
+			, game #>> '{awayProTeamId}' AS pro_team_id_away
 		
 		FROM schedules s
 	)
 	
-	-- controls_games_game_count 
-	-- check to make sure each team in each season has the appropriate number of games
-	, controls_games_game_count AS (
-		SELECT 
-			season_id
-			, pro_team_abbrev
-			, COUNT(*) AS cnt_records
-		FROM games
-		GROUP BY 1, 2
-		ORDER BY 1, 2
-	)
+	-- -- controls_games_game_count 
+	-- -- check to make sure each team in each season has the appropriate number of games
+	-- , controls_games_game_count AS (
+	-- 	SELECT 
+	-- 		season_id
+	-- 		, pro_team_abbrev
+	-- 		, COUNT(*) AS cnt_records
+	-- 	FROM games
+	-- 	GROUP BY 1, 2
+	-- 	ORDER BY 1, 2
+	-- )
 	
 	, lutu AS (
 		SELECT * FROM games
