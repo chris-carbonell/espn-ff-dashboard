@@ -8,4 +8,4 @@ RUN python -m pip install --upgrade pip \
 
 COPY ./app/main.py .
 
-CMD ["gunicorn", "main:server", "-b", "0.0.0.0:80"]
+CMD ["gunicorn", "main:server", "-b", "0.0.0.0:80", "--reload"]

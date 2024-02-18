@@ -1,5 +1,7 @@
 # data
 pandas
+psycopg2-binary
+sqlalchemy
 
 # viz
 dash

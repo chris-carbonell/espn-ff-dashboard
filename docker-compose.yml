@@ -63,8 +63,8 @@ services:
       
     container_name: ${PROJECT_ABBREV}-app
 
-    # volumes:
-    #   - ./app/app:/usr/app
+    volumes:
+      - ./app/app:/usr/app
 
     env_file:
       - .env
