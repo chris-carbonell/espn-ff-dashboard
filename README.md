@@ -10,6 +10,12 @@
     * `espnff`<br>https://github.com/rbarton65/espnff
     * useful for general layout of the API
 * how to get necessary cookies<br>https://cran.r-project.org/web/packages/ffscrapr/vignettes/espn_authentication.html
+* valid types for some fields
+    * https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2023?view=proTeamSchedules_wl
+    * e.g., winnerTypes = ["HOME", "AWAY", "TIE", "UNDECIDED"]
+* list players
+    * https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2023/players?scoringPeriodId=0&view=players_wl
+    * I think this is the one where we need to mess with headers to get all players
 
 # Questions
 * who drafts the best?
