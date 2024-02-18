@@ -5,7 +5,8 @@ WITH
 			request_id
 			, request_url
 			, res
-		FROM a_raw.matchup_score
+		FROM {{ source('raw', 'matchup_score') }}
+		LIMIT {{ var("limit", "ALL") }}
 	)
 	
 	-- schedule
