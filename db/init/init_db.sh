@@ -34,7 +34,7 @@ function create_table_for_view {
 execute "CREATE SCHEMA a_raw"
 
 # create tables for views
-declare -a views=("team" "roster" "matchup" "matchup_score" "settings" "standings")
+declare -a views=("team" "roster" "matchup" "matchup_score" "pro_team_schedules" "settings" "standings")
 for i in "${views[@]}"
 do
    create_table_for_view "$i"

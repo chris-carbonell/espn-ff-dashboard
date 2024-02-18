@@ -1,6 +1,7 @@
 # config
 PATH_CONN = "./config/connections.yml"
 PATH_LEAGUE = "./config/league.yml"
+PATH_REQUESTS = "./config/requests.yml"
 
 # db
 

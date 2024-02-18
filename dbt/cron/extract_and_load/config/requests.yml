@@ -1,0 +1,41 @@
+requests:
+
+  base_url: &base_url https://fantasy.espn.com/apis/v3/games/ffl/seasons/{{ season_id }}/segments/0/leagues/{{ league_id }}
+
+  by_season:
+    - table: pro_team_schedules
+      url: https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{{ season_id }}
+      params:
+        view: proTeamSchedules_wl
+
+  by_scoring_period:
+    - table: team
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mTeam
+    - table: roster
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mRoster
+    - table: matchup
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mMatchup
+    - table: matchup_score
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mMatchupScore
+    - table: settings
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mSettings
+    - table: standings
+      url: *base_url
+      params:
+        scoringPeriodId: {{ scoring_period_id }}
+        view: mStandings
