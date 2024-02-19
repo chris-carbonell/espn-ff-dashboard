@@ -52,3 +52,5 @@
     * can we recalculate scores from the ground up? the total points are provided
     * parsing loop<br>https://github.com/cwendt94/espn-api/blob/81f6d2f8a4dbb5715041d101ae76fb0dcd9e239c/espn_api/football/settings.py#L8
     * map of statId to colloqial name<br>https://github.com/cwendt94/espn-api/blob/81f6d2f8a4dbb5715041d101ae76fb0dcd9e239c/espn_api/football/constant.py#L271
+* get matchup win probabilities in real time so we can create those graphs to show crazy swings
+    * add timestamps to help identify games/plays
