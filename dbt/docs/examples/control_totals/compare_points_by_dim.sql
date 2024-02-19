@@ -3,6 +3,7 @@
 
 -- # Quickstart
 -- just update the `dim` and `fct` CTEs
+-- and `dim_id` in the `c_points_indiv` CTE
 
 WITH
 
@@ -25,6 +26,22 @@ WITH
 			, *
 		FROM d_mrt.fct_points fp
 	)
+	
+	, c_points_indiv AS (
+		SELECT
+            season_id
+            , scoring_period_id
+            , player_id AS dim_id
+
+            , SUM(points_actual) AS points_actual
+            , SUM(points_projected) AS points_projected
+
+        FROM c_int.int_player_stats__clean
+        
+        GROUP BY season_id
+        	, scoring_period_id
+        	, dim_id
+	)
 
 	, c_totals AS (
         SELECT
@@ -34,17 +51,18 @@ WITH
             , SUM(points_actual) AS points_actual
             , SUM(points_projected) AS points_projected
 
-        FROM c_int.int_player_stats__clean
-
-        GROUP BY 1, 2
-        ORDER BY 1, 2
+        FROM c_points_indiv
+        
+        GROUP BY season_id
+        	, scoring_period_id
     )
 
-	, d_points AS (
+	, d_points_indiv AS (
 		SELECT
 			g.season_id
 			, g.scoring_period_id
 			
+			, dim.dim_key
 			, dim.dim_id
 			
 			, SUM(fp.points_actual) AS points_actual
@@ -66,11 +84,34 @@ WITH
 		
 		GROUP BY g.season_id
 			, g.scoring_period_id
+			, dim.dim_key
 			, dim.dim_id
 			
 		ORDER BY g.season_id
 			, g.scoring_period_id
+			, dim.dim_key
 			, dim.dim_id
+	)
+
+	, d_points AS (
+		SELECT
+			season_id
+			, scoring_period_id
+			
+			, dim_id
+			
+			, SUM(points_actual) AS points_actual
+			, SUM(points_projected) AS points_projected
+		
+		FROM d_points_indiv
+		
+		GROUP BY season_id
+			, scoring_period_id
+			, dim_id
+			
+		ORDER BY season_id
+			, scoring_period_id
+			, dim_id
 	)
 	
 	, d_totals AS (
@@ -114,4 +155,41 @@ WITH
 			AND c.scoring_period_id = d.scoring_period_id
 	)
 	
-SELECT * FROM comparison
+	, missing_from_dim AS (
+		SELECT
+			COALESCE(c.season_id, d.season_id) AS season_id
+			, COALESCE(c.scoring_period_id, d.scoring_period_id) AS scoring_period_id
+			
+			, d.dim_key
+			, COALESCE(c.dim_id, d.dim_id) AS dim_id
+			
+			-- control
+			, c.points_actual AS c_points_actual
+			, c.points_projected AS c_points_projected
+			
+			-- test
+			, d.points_actual AS d_points_actual
+			, d.points_projected AS d_points_projected
+			
+			-- difference
+			, d.points_actual - c.points_actual AS diff_points_actual
+			, d.points_projected - c.points_projected AS diff_points_projected
+		
+		FROM c_points_indiv c
+		
+		FULL OUTER JOIN d_points_indiv d
+		ON c.dim_id = d.dim_id
+			AND c.season_id = d.season_id
+			AND c.scoring_period_id = d.scoring_period_id
+			
+		WHERE c.season_id IS NULL
+			OR c.scoring_period_id IS NULL
+			OR c.dim_id IS NULL
+	)
+	
+--SELECT * FROM comparison
+	
+SELECT
+	*
+FROM d_mrt.dim_players
+WHERE player_key IN (SELECT dim_key FROM missing_from_dim)
