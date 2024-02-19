@@ -14,6 +14,7 @@ WITH
 
             , season_id
             , scoring_period_id
+            , game_id
 
             , stat_id
 

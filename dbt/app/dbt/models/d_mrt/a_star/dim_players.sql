@@ -11,6 +11,7 @@ WITH
 
             , season_id
             , scoring_period_id
+            , game_id
             , player_id
             
             , player_full_name

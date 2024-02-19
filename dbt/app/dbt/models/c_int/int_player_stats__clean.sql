@@ -56,35 +56,87 @@ WITH
 			AND CAST(h.scoring_period_id AS INTEGER) = c.scoring_period_id
 	)
 
-	-- player_stats_current_each
-    -- get each stat its own row
-    , player_stats_current_each AS (
+	-- player_stats_current_actual
+    , player_stats_current_actual AS (
 		SELECT
-			p.request_id
-			, p.team_id
-			, p.player_id
-			, p.player_full_name
-			, p.position_name
-			, p.position_abbrev
-			, p.is_starter
-			, p.is_on_bench
-			, p.is_on_ir
-			, p.season_id
-			, p.scoring_period_id
-			, p.player_stats_id
-			, p.stat_source_id
-			, p.stat_split_type_id
-			, p.external_id
-			
-			, CAST(stats.key AS INTEGER) AS stat_id
+			request_id
+			, team_id
+			, external_id AS game_id
+			, player_id
+			, player_full_name
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
+			, season_id
+			, scoring_period_id
+			, applied_stats AS applied_stats_actual
 
-			, ROUND(stats.value::NUMERIC, 2) AS points
-			
-		FROM player_stats_current p
-		CROSS JOIN JSONB_EACH_TEXT(applied_stats) stats
+		FROM player_stats_current
+		WHERE scoring_period_id != '0'
+			AND stat_source_id = '0'
+			AND stat_split_type_id = '1'
 	)
 	
-	-- player_stats_current_each_actual
+	-- player_stats_current_projected
+    , player_stats_current_projected AS (
+		SELECT
+			request_id
+			, team_id
+			
+			-- the external ID for projected points is NOT the game ID
+			-- therefore, we set this to NULL and have COALESCE combine it with the
+			-- actual game ID from the actual stats CTE above
+			, NULL AS game_id
+			
+			, player_id
+			, player_full_name
+			, position_name
+			, position_abbrev
+			, is_starter
+			, is_on_bench
+			, is_on_ir
+			, season_id
+			, scoring_period_id
+			, applied_stats AS applied_stats_projected
+
+		FROM player_stats_current
+
+		WHERE scoring_period_id != '0'
+			AND stat_source_id = '1'
+			AND stat_split_type_id = '1'
+			AND CAST(season_id AS VARCHAR) || CAST(scoring_period_id AS VARCHAR) = external_id
+	)
+	
+	, player_stats_current_combined AS (
+		SELECT
+			COALESCE(a.request_id, p.request_id) AS request_id
+			, COALESCE(a.team_id, p.team_id) AS team_id
+			, COALESCE(a.game_id, p.game_id) AS game_id
+			, COALESCE(a.player_id, p.player_id) AS player_id
+			, COALESCE(a.player_full_name, p.player_full_name) AS player_full_name
+			, COALESCE(a.position_name, p.position_name) AS position_name
+			, COALESCE(a.position_abbrev, p.position_abbrev) AS position_abbrev
+			, COALESCE(a.is_starter, p.is_starter) AS is_starter
+			, COALESCE(a.is_on_bench, p.is_on_bench) AS is_on_bench
+			, COALESCE(a.is_on_ir, p.is_on_ir) AS is_on_ir
+			, COALESCE(a.season_id, p.season_id) AS season_id
+			, COALESCE(a.scoring_period_id, p.scoring_period_id) AS scoring_period_id
+			
+			, a.applied_stats_actual
+			, p.applied_stats_projected
+		
+		FROM player_stats_current_actual a
+		
+		FULL OUTER JOIN player_stats_current_projected p
+		ON a.season_id = p.season_id
+			AND a.scoring_period_id = p.scoring_period_id
+			AND a.player_id = p.player_id
+	)
+	
+ 	  -- player_stats_current_each_actual
+	  -- get each stat its own row
     , player_stats_current_each_actual AS (
 		SELECT
 			request_id
@@ -98,17 +150,18 @@ WITH
 			, is_on_ir
 			, season_id
 			, scoring_period_id
-			, stat_id
+			, game_id
 			
-			, points AS points_actual
-
-		FROM player_stats_current_each
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '0'
-			AND stat_split_type_id = '1'
+			-- actual
+			, CAST(stats_actual.key AS INTEGER) AS stat_id
+			, ROUND(stats_actual.value::NUMERIC, 2) AS points
+			
+		FROM player_stats_current_combined
+		CROSS JOIN JSONB_EACH_TEXT(applied_stats_actual) stats_actual
 	)
-	
+
 	-- player_stats_current_each_projected
+	  -- get each stat its own row
     , player_stats_current_each_projected AS (
 		SELECT
 			request_id
@@ -122,46 +175,42 @@ WITH
 			, is_on_ir
 			, season_id
 			, scoring_period_id
-			, stat_id
+			, game_id
 			
-			, points AS points_projected
-
-		FROM player_stats_current_each
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '1'
-			AND stat_split_type_id = '1'
-			AND CAST(season_id AS VARCHAR) || CAST(scoring_period_id AS VARCHAR) = external_id
+			-- projected
+			, CAST(stats_projected.key AS INTEGER) AS stat_id
+			, ROUND(stats_projected.value::NUMERIC, 2) AS points
+			
+		FROM player_stats_current_combined
+		CROSS JOIN JSONB_EACH_TEXT(applied_stats_projected) stats_projected
 	)
 	
-	-- player_stats_current_each_actual_and_projected
-	-- get project and actual points into their own columns
-	, player_stats_current_each_actual_and_projected AS (
+	, player_stats_current_each_combined AS (
 		SELECT
-			COALESCE(p.team_id, a.team_id) AS team_id
-			, COALESCE(p.player_id, a.player_id) AS player_id
-			, COALESCE(p.player_full_name, a.player_full_name) AS player_full_name
-			, COALESCE(p.position_name, a.position_name) AS position_name
-			, COALESCE(p.position_abbrev, a.position_abbrev) AS position_abbrev
-			, COALESCE(p.is_starter, a.is_starter) AS is_starter
-			, COALESCE(p.is_on_bench, a.is_on_bench) AS is_on_bench
-			, COALESCE(p.is_on_ir, a.is_on_ir) AS is_on_ir
-			, COALESCE(p.season_id, a.season_id) AS season_id
-			, COALESCE(p.scoring_period_id, a.scoring_period_id) AS scoring_period_id
-			, COALESCE(p.stat_id, a.stat_id) AS stat_id
+			COALESCE(a.request_id, p.request_id) AS request_id
+			, COALESCE(a.team_id, p.team_id) AS team_id
+			, COALESCE(a.game_id, p.game_id) AS game_id
+			, COALESCE(a.player_id, p.player_id) AS player_id
+			, COALESCE(a.player_full_name, p.player_full_name) AS player_full_name
+			, COALESCE(a.position_name, p.position_name) AS position_name
+			, COALESCE(a.position_abbrev, p.position_abbrev) AS position_abbrev
+			, COALESCE(a.is_starter, p.is_starter) AS is_starter
+			, COALESCE(a.is_on_bench, p.is_on_bench) AS is_on_bench
+			, COALESCE(a.is_on_ir, p.is_on_ir) AS is_on_ir
+			, COALESCE(a.season_id, p.season_id) AS season_id
+			, COALESCE(a.scoring_period_id, p.scoring_period_id) AS scoring_period_id
+			, COALESCE(a.stat_id, p.stat_id) AS stat_id
 			
-			, COALESCE(p.points_projected, 0) AS points_projected
-			, COALESCE(a.points_actual, 0) AS points_actual
-
-		FROM player_stats_current_each_projected p
-
-		FULL OUTER JOIN player_stats_current_each_actual a
-		ON p.request_id = a.request_id
-			AND p.team_id = a.team_id
-			AND p.player_id = a.player_id
-			AND p.player_full_name = a.player_full_name 
-			AND p.season_id = a.season_id
-			AND p.scoring_period_id = a.scoring_period_id
-			AND p.stat_id = a.stat_id
+			, a.points AS points_actual
+			, p.points AS points_projected
+		
+		FROM player_stats_current_each_actual a
+		
+		FULL OUTER JOIN player_stats_current_each_projected p
+		ON a.season_id = p.season_id
+			AND a.scoring_period_id = p.scoring_period_id
+			AND a.player_id = p.player_id
+			AND a.stat_id = p.stat_id
 	)
 
     -- clean
@@ -170,6 +219,7 @@ WITH
         SELECT
             season_id
 			, scoring_period_id
+			, game_id
 
 			, team_id
 
@@ -196,7 +246,7 @@ WITH
 			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'team_id']) }} as team_key
 			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'team_id']) }} as matchup_key
 
-        FROM player_stats_current_each_actual_and_projected
+        FROM player_stats_current_each_combined
     )
 
     , lutu AS (

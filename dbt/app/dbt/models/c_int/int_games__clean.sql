@@ -30,13 +30,33 @@ WITH
     , game_dows AS (
 		SELECT
 			*
+			
+			-- dow = day of week
 			, TO_CHAR(ts_game, 'Day') AS game_dow
+			
+			-- extract hour in prep for tod
+			, EXTRACT(HOUR FROM ts_game) AS game_hour
 			
 		FROM games
 	)
 	
+	, game_tods AS (
+		SELECT
+			*
+			
+			-- tod = time of day
+			, CASE
+				WHEN game_hour < 12 THEN 'morning'
+				WHEN game_hour >= 12 AND game_hour < 15 THEN 'early_afternoon'
+				WHEN game_hour >= 15 AND game_hour < 18 THEN 'late_afternoon'
+				WHEN game_hour >= 18 THEN 'evening'
+			END AS game_tod
+			
+		FROM game_dows
+	)
+	
 	, lutu AS (
-		SELECT * FROM game_dows
+		SELECT * FROM game_tods
 	)
 	
 SELECT * FROM lutu

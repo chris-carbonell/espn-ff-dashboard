@@ -97,14 +97,14 @@ WITH
 			, stats #>> '{scoringPeriodId}' AS scoring_period_id
 			
 			, stats #>> '{id}' AS player_stats_id
+			, stats #>> '{externalId}' AS external_id
+			-- externalId can be many things
+			-- one of which is the game ID from pro team schedules
 			
 			-- actual points
 			-- the real stats have statSourceId = 0 and statSplitTypeId = 1
 			, stats #>> '{statSourceId}' AS stat_source_id
 			, stats #>> '{statSplitTypeId}' AS stat_split_type_id
-			
-			-- project points
-			, stats #>> '{externalId}' AS external_id
 			
             -- applied total not needed because, when the stats are broken out,
             -- they'll total out to the applied total
