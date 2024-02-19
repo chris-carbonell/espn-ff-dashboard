@@ -10,7 +10,7 @@ WITH
 
     , dim AS (
         SELECT DISTINCT
-            {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'stat_id']) }} as stat_key
+            {{ dbt_utils.generate_surrogate_key(['game_id', 'stat_id']) }} as stat_key
 
             , season_id
             , scoring_period_id

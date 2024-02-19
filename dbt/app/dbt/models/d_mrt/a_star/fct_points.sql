@@ -21,12 +21,12 @@ WITH
 	, fct_points AS (
 		SELECT
 			-- surrogate keys
-			{{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id', 'ps.stat_id']) }} as stat_key
-			, {{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id']) }} as time_key
-			, {{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id', 'ps.player_id']) }} as player_key
-			, {{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id', 'ps.team_id']) }} as team_key
-			, {{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id', 'ps.team_id']) }} as matchup_key
-			, {{ dbt_utils.generate_surrogate_key(['ps.season_id', 'ps.scoring_period_id', 't.team_owner_member_id']) }} as member_key
+			{{ dbt_utils.generate_surrogate_key(['ps.game_id', 'ps.stat_id']) }} as stat_key
+			, {{ dbt_utils.generate_surrogate_key(['ps.game_id']) }} as time_key
+			, {{ dbt_utils.generate_surrogate_key(['ps.game_id', 'ps.player_id']) }} as player_key
+			, {{ dbt_utils.generate_surrogate_key(['ps.game_id', 'ps.team_id']) }} as team_key
+			, {{ dbt_utils.generate_surrogate_key(['ps.game_id', 'ps.team_id']) }} as matchup_key
+			, {{ dbt_utils.generate_surrogate_key(['ps.game_id', 't.team_owner_member_id']) }} as member_key
 
 			-- facts
 			, ps.points_projected
