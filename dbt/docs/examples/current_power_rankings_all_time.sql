@@ -8,7 +8,7 @@ WITH
 			time_key
 			, season_id
 			, scoring_period_id
-		FROM d_mrt.dim_time
+		FROM d_mrt.dim_times
 		ORDER BY season_id DESC, scoring_period_id DESC
 		LIMIT 1
 	)
@@ -25,7 +25,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp
 
-		LEFT JOIN d_mrt.dim_time t
+		LEFT JOIN d_mrt.dim_times t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_members mem
@@ -65,7 +65,7 @@ WITH
 		
 		FROM d_mrt.fct_points fp 
 		
-		LEFT JOIN d_mrt.dim_time t
+		LEFT JOIN d_mrt.dim_times t
 		ON fp.time_key = t.time_key
 		
 		LEFT JOIN d_mrt.dim_matchups m
@@ -121,19 +121,21 @@ WITH
 				, ROUND(SUM(team_points)::NUMERIC, 0) AS points_for
 				, ROUND(SUM(opponent_points)::NUMERIC, 0) AS points_against
 
-				-- , SUM(m.team_won) AS team_wins
-				-- , SUM(m.team_lost) AS team_losses
-				-- , SUM(m.team_tied) AS team_ties
+				 , SUM(team_won) AS team_wins
+				 , SUM(team_lost) AS team_losses
+				 , SUM(team_tied) AS team_ties
 				, SUM(team_won) || '-' || SUM(team_lost) || '-' || SUM(team_tied) AS actual_win_loss
-				, 100 * ROUND((SUM(team_won) + 0.5 * SUM(team_tied)) / (SUM(team_won) + SUM(team_lost) + SUM(team_tied))::NUMERIC, 2) AS actual_win_pct
+				-- , 100 * ROUND((SUM(team_won) + 0.5 * SUM(team_tied)) / (SUM(team_won) + SUM(team_lost) + SUM(team_tied))::NUMERIC, 2) AS actual_win_pct
+				, (SUM(team_won) + 0.5 * SUM(team_tied)) / (SUM(team_won) + SUM(team_lost) + SUM(team_tied)) AS actual_win_pct
 
 				-- power rankings
 				
-				-- , SUM(power_rank_team_wins) AS power_rank_team_wins	
-				-- , SUM(power_rank_team_losses) AS power_rank_team_losses
-				-- , SUM(power_rank_team_ties) AS power_rank_team_ties
+				 , SUM(power_rank_team_wins) AS power_rank_team_wins	
+				 , SUM(power_rank_team_losses) AS power_rank_team_losses
+				 , SUM(power_rank_team_ties) AS power_rank_team_ties
 				, SUM(power_rank_team_wins) || '-' || SUM(power_rank_team_losses) || '-' || SUM(power_rank_team_ties) AS power_rank_win_loss
-				, 100 * ROUND((SUM(power_rank_team_wins) + 0.5 * SUM(power_rank_team_ties)) / (SUM(power_rank_team_wins) + SUM(power_rank_team_losses) + SUM(power_rank_team_ties))::NUMERIC, 2) AS power_rank_win_pct
+				-- , 100 * ROUND((SUM(power_rank_team_wins) + 0.5 * SUM(power_rank_team_ties)) / (SUM(power_rank_team_wins) + SUM(power_rank_team_losses) + SUM(power_rank_team_ties))::NUMERIC, 2) AS power_rank_win_pct
+				, (SUM(power_rank_team_wins) + 0.5 * SUM(power_rank_team_ties)) / (SUM(power_rank_team_wins) + SUM(power_rank_team_losses) + SUM(power_rank_team_ties)) AS power_rank_win_pct
 			
 			FROM stats_scoring_period
 			
@@ -143,19 +145,63 @@ WITH
 		) t
 	)
 	
-	, stats_all_time_luck AS (
+	, stats_all_time_luck_p AS (
 		SELECT
 			*
 			-- luck
 			-- luck < 0: not lucky
 			-- luck > 0: lucky
 			-- luck = 0: neither lucky nor unlucky
-			, 100 * ROUND(((actual_win_pct - power_rank_win_pct) / 200)::NUMERIC, 2) AS luck
+			, 100 * ROUND(((actual_win_pct - power_rank_win_pct) / 200)::NUMERIC, 2) AS luck_simple
+			
+			, (actual_win_pct * (team_wins + team_losses + team_ties) + power_rank_win_pct * (power_rank_team_wins + power_rank_team_losses + power_rank_team_ties)) / (team_wins + team_losses + team_ties + power_rank_team_wins + power_rank_team_losses + power_rank_team_ties) AS p
+			, team_wins + team_losses + team_ties AS n_actual
+			, power_rank_team_wins + power_rank_team_losses + power_rank_team_ties AS n_power_rank
+			
 		FROM stats_all_time
+	)
+	
+	, stats_all_time_luck_se AS (
+		SELECT
+			*
+						
+			, SQRT(p * (1 - p) * ((1 / n_actual) + (1 / n_power_rank))) AS se
+			
+		FROM stats_all_time_luck_p
+	)
+	
+	, stats_all_time_luck_z AS (
+		SELECT
+			*
+						
+			-- , (actual_win_pct - power_rank_win_pct) / se AS z
+			, (actual_win_pct - power_rank_win_pct) / se AS luck
+			
+		FROM stats_all_time_luck_se
+	)
+	
+	, stats_all_time_luck AS (
+		SELECT
+			member_name
+			, team_name
+			, points_for
+			, points_against
+
+			, actual_win_loss
+			, ROUND(actual_win_pct::NUMERIC, 2) AS actual_win_pct
+
+			, power_rank_win_loss
+			, ROUND(power_rank_win_pct::NUMERIC, 2) AS power_rank_win_pct
+			
+			, power_ranking
+
+			, ROUND(luck::NUMERIC, 1) AS luck
+			
+		FROM stats_all_time_luck_z
 	)
 	
 	, lutu AS (
 		SELECT * FROM stats_all_time_luck
 	)
 	
-SELECT * FROM lutu
+SELECT * FROM lutussss
