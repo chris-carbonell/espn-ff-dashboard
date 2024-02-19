@@ -42,8 +42,8 @@ WITH
 
 	, d_points AS (
 		SELECT
-			t.season_id
-			, t.scoring_period_id
+			g.season_id
+			, g.scoring_period_id
 			
 			, dim.dim_id
 			
@@ -52,8 +52,8 @@ WITH
 		
 		FROM fct fp
 		
-		LEFT JOIN d_mrt.dim_times t
-		ON fp.time_key = t.time_key
+		LEFT JOIN d_mrt.dim_games g
+		ON fp.game_key = g.game_key
 		
 		LEFT JOIN dim
 		ON fp.dim_key = dim.dim_key
@@ -64,12 +64,12 @@ WITH
 		-- eventhough none of the keys matched
 		WHERE dim.dim_key IS NOT NULL
 		
-		GROUP BY t.season_id
-			, t.scoring_period_id
+		GROUP BY g.season_id
+			, g.scoring_period_id
 			, dim.dim_id
 			
-		ORDER BY t.season_id
-			, t.scoring_period_id
+		ORDER BY g.season_id
+			, g.scoring_period_id
 			, dim.dim_id
 	)
 	
