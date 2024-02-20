@@ -74,8 +74,7 @@ WITH
 			, applied_stats AS applied_stats_actual
 
 		FROM player_stats_current
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '0'
+		WHERE stat_source_id = '0'
 			AND stat_split_type_id = '1'
 	)
 	
@@ -103,8 +102,7 @@ WITH
 
 		FROM player_stats_current
 
-		WHERE scoring_period_id != '0'
-			AND stat_source_id = '1'
+		WHERE stat_source_id = '1'
 			AND stat_split_type_id = '1'
 			AND CAST(season_id AS VARCHAR) || CAST(scoring_period_id AS VARCHAR) = external_id
 	)
@@ -135,6 +133,37 @@ WITH
 			AND a.player_id = p.player_id
 	)
 	
+	-- player_stats_current_combined_w_game
+	-- get game ID from schedule if necessary
+	, player_stats_current_combined_w_game AS (
+		SELECT
+			ps.request_id
+			, ps.team_id
+			, ps.player_id
+			, ps.player_full_name
+			, ps.position_name
+			, ps.position_abbrev
+			, ps.is_starter
+			, ps.is_on_bench
+			, ps.is_on_ir
+			, ps.season_id
+			, ps.scoring_period_id
+			
+			-- get game ID from schedules
+			, COALESCE(ps.game_id, g.game_id) AS game_id
+
+			, ps.applied_stats_actual
+			, ps.applied_stats_projected
+		
+		FROM player_stats_current_combined ps
+		
+					
+		LEFT JOIN b_stg.stg_pro_team_schedules__games g
+		ON ps.season_id = g.season_id::INTEGER
+			AND ps.scoring_period_id = g.scoring_period_id::INTEGER 
+			AND ps.team_id = g.pro_team_id::INTEGER
+	)
+	
  	  -- player_stats_current_each_actual
 	  -- get each stat its own row
     , player_stats_current_each_actual AS (
@@ -156,7 +185,7 @@ WITH
 			, CAST(stats_actual.key AS INTEGER) AS stat_id
 			, ROUND(stats_actual.value::NUMERIC, 2) AS points
 			
-		FROM player_stats_current_combined
+		FROM player_stats_current_combined_w_game
 		CROSS JOIN JSONB_EACH_TEXT(applied_stats_actual) stats_actual
 	)
 
@@ -181,7 +210,7 @@ WITH
 			, CAST(stats_projected.key AS INTEGER) AS stat_id
 			, ROUND(stats_projected.value::NUMERIC, 2) AS points
 			
-		FROM player_stats_current_combined
+		FROM player_stats_current_combined_w_game
 		CROSS JOIN JSONB_EACH_TEXT(applied_stats_projected) stats_projected
 	)
 	
