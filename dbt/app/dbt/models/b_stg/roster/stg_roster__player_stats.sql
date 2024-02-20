@@ -101,7 +101,6 @@ WITH
 			-- externalId can be many things
 			-- one of which is the game ID from pro team schedules
 			
-			-- actual points
 			-- the real stats have statSourceId = 0 and statSplitTypeId = 1
 			, stats #>> '{statSourceId}' AS stat_source_id
 			, stats #>> '{statSplitTypeId}' AS stat_split_type_id
@@ -110,6 +109,7 @@ WITH
             -- they'll total out to the applied total
             -- this might be nice for verification in the future
 			-- , stats #> '{appliedTotal}' AS applied_total
+			
 			, stats #> '{appliedStats}' AS applied_stats
 			
 		FROM player_stats
