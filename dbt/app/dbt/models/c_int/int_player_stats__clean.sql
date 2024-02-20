@@ -267,14 +267,6 @@ WITH
             , ROUND(points_projected::NUMERIC, 2) AS points_projected
             , ROUND(points_actual::NUMERIC, 2) AS points_actual
 
-			-- keys
-			-- for tracing back
-			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'stat_id']) }} as stat_key
-			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id']) }} as time_key
-			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'player_id']) }} as player_key
-			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'team_id']) }} as team_key
-			, {{ dbt_utils.generate_surrogate_key(['season_id', 'scoring_period_id', 'team_id']) }} as matchup_key
-
         FROM player_stats_current_each_combined
     )
 
