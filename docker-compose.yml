@@ -80,7 +80,10 @@ services:
         condition: service_healthy
     
     volumes:
-      - ./cube:/cube/conf
+      - ./cube/conf:/cube/conf
+
+    networks:
+      - *network
 
   # app
   app:
