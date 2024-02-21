@@ -1,6 +1,10 @@
 # Overview
 # build env to pull data and visualize it
 
+# anchors
+x-network:
+  &network ffd
+
 version: '3.7'
 
 name: ${PROJECT_NAME}  # project name (aka stack)
@@ -31,7 +35,7 @@ services:
       retries: 3
 
     networks:
-      - ffd
+      - *network
 
   # dbt
   dbt:
@@ -54,7 +58,24 @@ services:
         condition: service_healthy
 
     networks:
-      - ffd
+      - *network
+
+  # cube
+  cube:
+    image: cubejs/cube:latest
+    
+    ports:
+      - 4000:4000
+      - 15432:15432
+    
+    environment:
+      - CUBEJS_DEV_MODE=true
+
+    env_file:
+      - .env
+    
+    volumes:
+      - ./cube:/cube/conf
 
   # app
   app:
@@ -77,7 +98,7 @@ services:
         condition: service_healthy
 
     networks:
-      - ffd
+      - *network
 
   # jupyterlab
   lab:
@@ -107,7 +128,7 @@ services:
         condition: service_healthy
 
     networks:
-      - ffd
+      - *network
 
 networks:
-  ffd:
+  *network:
