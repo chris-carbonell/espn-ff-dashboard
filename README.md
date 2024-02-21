@@ -10,6 +10,12 @@
     * `espnff`<br>https://github.com/rbarton65/espnff
     * useful for general layout of the API
 * how to get necessary cookies<br>https://cran.r-project.org/web/packages/ffscrapr/vignettes/espn_authentication.html
+* valid types for some fields
+    * https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2023?view=proTeamSchedules_wl
+    * e.g., winnerTypes = ["HOME", "AWAY", "TIE", "UNDECIDED"]
+* list players
+    * https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2023/players?scoringPeriodId=0&view=players_wl
+    * I think this is the one where we need to mess with headers to get all players
 
 # Questions
 * who drafts the best?
@@ -23,6 +29,8 @@
     * if each team played every other team, what would their record be?
 
 # Roadmap
+* real game data
+    * https://gist.github.com/nntrn/ee26cb2a0716de0947a0a4e9a157bc1c#games
 * metrics
     * close games (loser_points + 5 <= winner_points)
     * management efficiency (actual_starter_points / best_starter_points)
@@ -46,3 +54,6 @@
     * can we recalculate scores from the ground up? the total points are provided
     * parsing loop<br>https://github.com/cwendt94/espn-api/blob/81f6d2f8a4dbb5715041d101ae76fb0dcd9e239c/espn_api/football/settings.py#L8
     * map of statId to colloqial name<br>https://github.com/cwendt94/espn-api/blob/81f6d2f8a4dbb5715041d101ae76fb0dcd9e239c/espn_api/football/constant.py#L271
+* get matchup win probabilities in real time so we can create those graphs to show crazy swings
+    * add timestamps to help identify games/plays
+    * R example<br>https://gist.github.com/mrcaseb/0f868193affb4be152e8e82c43a4dc07

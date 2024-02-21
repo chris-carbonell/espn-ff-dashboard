@@ -10,6 +10,7 @@ sources:
     tables:
       - name: matchup
       - name: matchup_score
+      - name: pro_team_schedules
       - name: roster
       - name: settings
       - name: standings

@@ -5,7 +5,6 @@ from datetime import datetime
 import json
 import logging
 import os
-import re
 
 # data
 import requests
@@ -46,15 +45,16 @@ def get_cookies(config: str | dict):
 
 def get_data(url: str, cookies: dict, **kwargs):
     '''
-    get response from API and prepare for insert
+    get response from API
 
     # Example
     ```
     cookies = get_cookies()
     url = "https://fantasy.espn.com/apis/v3/games/ffl/seasons/2023/segments/0/leagues/22557595"
     params = {'view': ['mTeam', 'mRoster', 'mMatchup', 'mSettings', 'mStandings']}
-    data = get_data(
+    res = get_data(
         url,
+        cookies,
         params = params,
     )
     ```
@@ -68,7 +68,6 @@ def get_data(url: str, cookies: dict, **kwargs):
     }
     
     # get res
-    ts_before_request = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     res = requests.get(
         url,
         cookies = cookies,
@@ -76,6 +75,17 @@ def get_data(url: str, cookies: dict, **kwargs):
         **kwargs
     )
     logger.debug(res.url)
+
+    return res
+
+def gather_data(url: str, cookies: dict, **kwargs):
+    '''
+    get response from API and prepare for insert
+    '''
+
+    # get data
+    ts_before_request = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    res = get_data(url, cookies, **kwargs)
     
     # prep data
     data = {
@@ -172,7 +182,7 @@ def compare_dicts(d1, d2, keys=["$"]):
 
 def insert_data(engine, table: str, data: dict):
     '''
-    insert data (from get_data) into raw table
+    insert data (from gather_data) into raw table
     '''
     sql = f"""
         INSERT INTO {RAW_SCHEMA}.{table}
@@ -183,24 +193,21 @@ def insert_data(engine, table: str, data: dict):
     with engine.begin() as con:
         con.execute(text(sql), data)
 
-def update_raw(engine, cookies: dict, league_id: str, season_id: str, scoring_period: str, view: str, force_insert: bool = False):
+def update_raw(
+    engine, 
+    table: str, 
+    url: str, 
+    cookies: dict, 
+
+    params: dict = None,
+    force_insert: bool = False
+    ):
     '''
     request latest data and insert if new
     '''
 
-    def _camel_to_snake(name):
-        '''
-        convert camel case (MatchupScore) to snake case (matchup_score)
-        '''
-        return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
-
-    # parse
-    table = _camel_to_snake(view[1:])  # views start with "m" so chop it off
-
     # get res
-    url = f"https://fantasy.espn.com/apis/v3/games/ffl/seasons/{season_id}/segments/0/leagues/{league_id}"
-    params = {'scoringPeriodId': scoring_period, 'view': view}
-    request_url, data = get_data(url = url, params = params, cookies = cookies)
+    request_url, data = gather_data(url = url, params = params, cookies = cookies)
 
     # determine if insert necessary
     if force_insert:
