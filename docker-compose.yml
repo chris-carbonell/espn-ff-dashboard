@@ -63,6 +63,7 @@ services:
   # cube
   cube:
     image: cubejs/cube:latest
+    container_name: ${PROJECT_ABBREV}-cube
     
     ports:
       - 4000:4000
@@ -73,6 +74,10 @@ services:
 
     env_file:
       - .env
+
+    depends_on:
+      db:
+        condition: service_healthy
     
     volumes:
       - ./cube:/cube/conf
