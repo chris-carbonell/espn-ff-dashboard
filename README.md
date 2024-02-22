@@ -16,6 +16,8 @@
 * list players
     * https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2023/players?scoringPeriodId=0&view=players_wl
     * I think this is the one where we need to mess with headers to get all players
+* cube & dbt
+    * https://github.com/cube-js/jaffle_shop_cube/tree/main
 
 # Questions
 * who drafts the best?

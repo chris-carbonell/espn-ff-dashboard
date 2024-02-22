@@ -49,6 +49,7 @@ services:
       - ./dbt/app:/usr/app
       - ./dbt/profiles.yml:/root/.dbt/profiles.yml
       # - ./dbt/cron/extract_and_load:/home/update/extract_and_load
+      - dbt_cube:/usr/app/dbt_cube
 
     env_file:
       - .env
@@ -62,7 +63,7 @@ services:
 
   # cube
   cube:
-    image: cubejs/cube:latest
+    build: ./cube/build
     container_name: ${PROJECT_ABBREV}-cube
     
     ports:
@@ -80,7 +81,9 @@ services:
         condition: service_healthy
     
     volumes:
-      - ./cube/conf:/cube/conf
+      - ./cube/app/conf:/cube/conf
+      # - ./cube/app/model:/usr/app/model
+      # - dbt_cube:/usr/app/dbt_cube
 
     networks:
       - *network
@@ -140,3 +143,6 @@ services:
 
 networks:
   *network:
+
+volumes:
+  dbt_cube:
